@@ -1,0 +1,67 @@
+Planning - Chess in command line.
+
+Key elements we will need:
+- Chess
+    - Holds on to the players, board. Can call the save_manager.
+    - Keeps track of all moves to display, also for save and load.
+    - Handles display of the board and input from players.
+    - Knows who's turn it is.
+    - Responsibility is to control the flow of the game by passing messages between the other classes.
+    - Converts the move notation to something the game can understand and vice versa - so maybe a NotationConverter class or module?
+- GameBoard
+    - Holds on to the pieces.
+    - Knows the state of the board.
+    - Responsibility is to update and communicate the state of the board.
+    - Maybe another class or module LegalMoveFinder?
+- Piece < King, Queen, Rook, Bishop, Knight, Pawn
+    - Knows how it can move.
+    - Knows its own color.
+- Player
+    - Responsibility is to make moves.
+- SaveManager
+    - Responsible to save and load files. Load from directory with basic interface.
+
+Game flow:
+INIT the game, board, pieces and players.
+DISPLAY the board and players.
+WHILE game is not over:
+  ASK next player for move.
+  COMPUTE move and send interpreted move information to board.
+  Board COMPUTES if this move is legal.
+    IF legal, update board, returns board for display
+    ELSE IF illegal, returns error messages
+  Game ASKS Board 'check?'
+  Game ASKS Board 'won?'
+  (I think I will skip 'position repeated three times draw')
+  Game DISPLAYS board and gives player feedback on move (check / checkmate / stalemate etc.)
+END
+DISPLAY winner message and offer to play new game.
+IF play new game:
+  Clear Board
+  Switch player colors.
+  Next player white
+ELSE
+  exit
+END
+
+8 * 8 board.
+[0][0] [0][1] [0][2] [0][3] [0][4] [0][5] [0][6] [0][7]
+[1][0] [1][1] [1][2] [1][3] [1][4] [1][5] [1][6] [1][7]
+[2][0] [2][1] [2][2] [2][3] [2][4] [2][5] [2][6] [2][7]
+[3][0] [3][1] [3][2] [3][3] [3][4] [3][5] [3][6] [3][7]
+[4][0] [4][1] [4][2] [4][3] [4][4] [4][5] [4][6] [4][7]
+[5][0] [5][1] [5][2] [5][3] [5][4] [5][5] [5][6] [5][7]
+[6][0] [6][1] [6][2] [6][3] [6][4] [6][5] [6][6] [6][7]
+[7][0] [7][1] [7][2] [7][3] [7][4] [7][5] [7][6] [7][7]
+
+Starting position - one possibility to make it easy to visualise in the code itself:
+board = [
+    %w[r n b q k b n r],
+    %w[p p p p p p p p],
+    %w[. . . . . . . .],
+    %w[. . . . . . . .],
+    %w[. . . . . . . .],
+    %w[. . . . . . . .],
+    %w[P P P P P P P P], 
+    %w[R N B Q K B N R]
+]
