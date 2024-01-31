@@ -30,9 +30,9 @@ WHILE game is not over:
   Board COMPUTES if this move is legal.
     IF legal, update board, returns board for display
     ELSE IF illegal, returns error messages
-  Game ASKS Board 'check?'
+  Game ASKS Board 'in_check?'
   Game ASKS Board 'won?'
-  (I think I will skip 'position repeated three times draw')
+  (I think I will skip 'position repeated three times draw', and at least initially en passant)
   Game DISPLAYS board and gives player feedback on move (check / checkmate / stalemate etc.)
 END
 DISPLAY winner message and offer to play new game.
@@ -65,3 +65,156 @@ board = [
     %w[P P P P P P P P], 
     %w[R N B Q K B N R]
 ]
+
+The question I am least sure about is what these objects in the array should be:
+- Simple chars, indexed to a set of Piece objects?
+- The actual objects themselves? I.e. 8 white Pawns, 8 black Pawns, etc etc.
+I will start by trying the char method.
+
+So the big implementation pieces are:
+- LegalMoveFinder is probably the biggest and most complicated. I have to have a Board, Pieces, and movement sorted out for this.
+- Parsing the text input is the next most complicated.
+
+I will begin with the legal moves. I think the board will know which piece is moving and the desired square. 
+Finding a legal move has two parts: can the piece move there, and does it leave player in check? They can be implemented separately.
+Can the piece move there? Thinking about it, the only way I can see to work this out is to find all the legal moves for a piece, and check if they include the given square.
+Given that every turn we must check for stalemate, we can start a turn by generating an array of all the legal moves for that piece colour.
+legal_moves
+- Init array of legal moves
+- For each piece
+  - Starting at the square the piece occupies
+  - For each direction of movement up to max squares
+    - Look at each square along its direction of movement.
+      - If it is vacant, it can move there:
+        - add to the list of legal moves
+      - Else if it is occupied by an enemy piece, it can capture there:
+        - add to the list of legal moves and exit loop
+      - Else if it is occupied by a friendly piece or it is off the board:
+        - Exit loop
+    - End loop
+  - End loop
+  - If no, return no.
+  - If yes, is the player then in check?
+  - Make the move provisionally on the board and inspect.
+in_check?
+  - For each opposing piece:
+    - Can that piece capture the king? (recursive call to find its moves)
+    - (if it can, would that place the opponent in check?)
+    - If it can capture the king, return true
+  - End loop
+If in_check? is false, return true and leave the move on the board.
+If in_check? is true, return false and revert the move.
+
+- Is the given square in the array of legal moves?
+  
+
+So we need to know the piece's:
+- Directions of movement 
+- Max squares to move
+And this same pair of parameters covers all pieces.
+
+The set of directions are:
+orthogonal = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+diagonal = [[-1, 1], [-1, -1], [1, 1], [1, -1]]
+knight = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
+
+Note that for black and white, the movement patterns are all the same with exception of pawn.
+Pawn will select only directions beginning with -1 (white) or 1 (black)
+
+Piece
+  @color
+
+Pawn
+  @first_move?
+  @direction
+  Directions:
+    (diagonal + orthogonal).select { where index 0 == direction }
+  Max:
+    2 if first_move?, 1 if not.
+  Unique:
+    Captures one square diagonally forward
+    En passant - when an opponents pawn has just moved two spaces forward, it can capture as if it had moved one space forward.
+    Promotion:
+      If moves to row 0 (white) or row 7 (black) it must promote to any other piece type except King.
+
+Knight
+  Directions: knight
+  Max:        1
+
+Bishop
+  Directions: diagonal
+  Max:        8
+
+Rook
+  Directions: orthogonal
+  Max:        8
+
+Queen
+  Directions: orthogonal + diagonal
+  Max:        8
+
+King
+  Directions: orthogonal + diagonal
+  Max:        1
+
+So the pawn is the trickiest to implement - not the place to start. Rather than implementing the entire board and then the interface between, I'll do it piece by piece to uncover problems.
+
+Goals:
+Move a single knight around the board using an interface
+- Represent an empty game board
+- Add a single knight to the game board
+- Find its legal moves and return them (skip in_check?) in a format like [[N, 5, 2], [N, 6, 1]] (for a knight on a1)
+- Player inputs a move, if it is in the legal moves set, the game_board moves it.
+
+Move two knights of the same color
+- Add another knight
+- Board won't move the knight on top of that knight
+
+Move 4 knights - now have two players taking turns.
+- Add two more knights
+- Board will allow capturing moves
+
+Add bishops, rooks, queens, kings (still no check)
+
+Add Pawns. At this point can play a full game.
+
+Add 'in_check?'
+Add 'result?'
+
+Add save and load
+
+BOARD:
+White:  ♔♕♖♗♘♙
+Black:  ♚♛♜♝♞♟︎
+
+
+8♜♞♝♛♚♝♞♜
+7♟︎♟︎♟︎♟︎♟︎♟︎♟︎♟︎
+6
+5
+4
+3
+2♙♙♙♙♙♙♙♙
+1♖♘♗♕♔♗♘♖
+.abcdefgh
+
+Colorize options:
+black
+red
+green
+yellow
+blue
+magenta
+cyan
+white
+default
+light_black
+light_red
+light_green
+light_yellow
+light_blue
+light_magenta
+light_cyan
+light_white
+grey
+gray
