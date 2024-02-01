@@ -51,6 +51,12 @@ describe GameBoard do
       ])
     end
 
+    it 'returns a string representing the board' do
+      board_display = game_board_knight.display
+      expect(board_display).to include('♞')
+      expect(board_display).not_to include('N')
+
+    end
   end
 end
 

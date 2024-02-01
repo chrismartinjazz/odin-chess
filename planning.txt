@@ -165,7 +165,8 @@ Goals:
 Move a single knight around the board using an interface
 - Represent an empty game board
 - Add a single knight to the game board
-- Find its legal moves and return them (skip in_check?) in a format like [[N, 5, 2], [N, 6, 1]] (for a knight on a1)
+- Find its legal moves and return them (skip in_check?) in a format like ['N' [5, 2], [6, 1]] (for a knight on a1)
+- Build game shell, player object, simple interface.
 - Player inputs a move, if it is in the legal moves set, the game_board moves it.
 
 Move two knights of the same color

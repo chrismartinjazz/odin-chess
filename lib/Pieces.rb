@@ -8,4 +8,8 @@ class Knight
     @move_i = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
     @max_move = 1
   end
+
+  def to_s
+    'N'
+  end
 end

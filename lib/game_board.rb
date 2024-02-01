@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'colorize'
+
 require_relative 'Pieces'
 
 # Holds the pieces and finds legal moves
@@ -28,8 +30,8 @@ class GameBoard
   end
 
   def move(move_start, move_end)
-    board[move_end[0]][move_end[1]] = board[move_start[0]][move_start[1]]
-    board[move_start[0]][move_start[1]] = nil
+    @board[move_end[0]][move_end[1]] = @board[move_start[0]][move_start[1]]
+    @board[move_start[0]][move_start[1]] = nil
   end
 
   def legal_moves
@@ -37,37 +39,89 @@ class GameBoard
 
     (0..7).each do |row_i|
       (0..7).each do |col_i|
-        next if board[row_i][col_i].nil?
+        next if @board[row_i][col_i].nil?
 
-        piece = board[row_i][col_i]
-        legal_moves.push(find_moves(piece, [row_i, col_i]))
+        piece = @board[row_i][col_i]
+        legal_moves += (find_moves(piece, [row_i, col_i]))
       end
     end
     legal_moves
   end
 
   def find_moves(piece, start)
+    moves = []
+    # For each direction the piece can move
     piece.move_i.each do |move|
-      piece.max_move.times do |squares|
-        finish = [start[0] + (move[0] * squares), start[1] + (move[1] * squares)]
-        # TODO continue this tomorrow
+      # Up to as many squares as it can travel
+      (1..piece.max_move).each do |squares|
+        # Locate the finishing square
+        finish_sq = [start[0] + (move[0] * squares), start[1] + (move[1] * squares)]
+        # Go to the next move direction if it is off the board
+        break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
+
+        # Store the occupant of the finish square
+        finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+        # If it is empty, we can move there - store it and continue.
+        if finish_occupant.nil?
+          moves.push([piece.to_s, start, finish_sq])
+          next
+        # If it is occupied by an opposing piece, we can capture it, add to legal moves
+        elsif finish_occupant.color != piece.color
+          moves.push([piece.to_s, start, finish_sq])
+        end
+        # If we have reached this line, we have either stored the capture move, or
+        # we are looking at a piece of our own color - so go to the next move direction.
+        break
       end
     end
-    #.Init legal moves array
-    #.For each square
-    #.  If nil, continue
-    #.  If it is not nil, identify it
-    #   For each move_i of that piece
-    #     For each from 1 to max_move
-    #       Inspect the square.
-    #       If it is vacant, it can move there:
-    #         add to the list of legal moves
-    #       Else if it is occupied by an enemy piece, it can capture there:
-    #         add to the list of legal moves and exit loop
-    #       Else if it is occupied by a friendly piece or it is off the board:
-    #         Exit loop
-    #       End if
-    #     End For
-    #   End For
+    moves
+  end
+
+  def display
+    board_copy = []
+    (0..7).each do |row_i|
+      new_row = @board[row_i].map { |elem| elem.nil? ? '.' : elem.to_s }
+      board_copy << new_row
+    end
+
+    piece_map = [
+      ['.', 'K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'],
+      ['  ', '♚ ', '♛ ', '♜ ', '♝ ', '♞ ', '♟︎ ', '♔ ', '♕ ', '♖ ', '♗ ', '♘ ', '♙ ']
+    ]
+
+    (0..7).each do |row_i|
+      board_copy[row_i].map! { |char| piece_map[1][piece_map[0].index(char) ]}
+    end
+
+    str = ''
+    [0, 2, 4, 6].each do |row_pair|
+      # First row in pair
+      str += "#{8 - row_pair} "
+      [0, 2, 4, 6].each do |col_pair|
+        str += board_copy[row_pair][col_pair].on_grey
+        str += board_copy[row_pair][col_pair + 1].on_magenta
+      end
+      str += "\n"
+      # Second row in pair
+      str += "#{8 - row_pair - 1} "
+      [0, 2, 4, 6].each do |col_pair|
+        str += board_copy[row_pair + 1][col_pair].on_magenta
+        str += board_copy[row_pair + 1][col_pair + 1].on_grey
+      end
+      str += "\n"
+    end
+    str + "  a b c d e f g h\n"
   end
 end
+
+# one_knight = %w[
+#     ........
+#     ........
+#     ........
+#     ........
+#     ........
+#     ........
+#     ........
+#     N.......
+#   ]
+# GameBoard.new(one_knight).display
