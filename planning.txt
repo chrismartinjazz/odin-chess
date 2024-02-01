@@ -81,9 +81,11 @@ Can the piece move there? Thinking about it, the only way I can see to work this
 Given that every turn we must check for stalemate, we can start a turn by generating an array of all the legal moves for that piece colour.
 legal_moves
 - Init array of legal moves
-- For each piece
-  - Starting at the square the piece occupies
-  - For each direction of movement up to max squares
+- For each square
+  - If nil, continue.
+
+  - If not, identify the piece.
+  - For each direction of movement, up to max squares
     - Look at each square along its direction of movement.
       - If it is vacant, it can move there:
         - add to the list of legal moves
