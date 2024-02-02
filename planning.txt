@@ -45,14 +45,15 @@ ELSE
 END
 
 8 * 8 board.
-[0][0] [0][1] [0][2] [0][3] [0][4] [0][5] [0][6] [0][7]
-[1][0] [1][1] [1][2] [1][3] [1][4] [1][5] [1][6] [1][7]
-[2][0] [2][1] [2][2] [2][3] [2][4] [2][5] [2][6] [2][7]
-[3][0] [3][1] [3][2] [3][3] [3][4] [3][5] [3][6] [3][7]
-[4][0] [4][1] [4][2] [4][3] [4][4] [4][5] [4][6] [4][7]
-[5][0] [5][1] [5][2] [5][3] [5][4] [5][5] [5][6] [5][7]
-[6][0] [6][1] [6][2] [6][3] [6][4] [6][5] [6][6] [6][7]
-[7][0] [7][1] [7][2] [7][3] [7][4] [7][5] [7][6] [7][7]
+8  [0][0] [0][1] [0][2] [0][3] [0][4] [0][5] [0][6] [0][7]
+7  [1][0] [1][1] [1][2] [1][3] [1][4] [1][5] [1][6] [1][7]
+6  [2][0] [2][1] [2][2] [2][3] [2][4] [2][5] [2][6] [2][7]
+5  [3][0] [3][1] [3][2] [3][3] [3][4] [3][5] [3][6] [3][7]
+4  [4][0] [4][1] [4][2] [4][3] [4][4] [4][5] [4][6] [4][7]
+3  [5][0] [5][1] [5][2] [5][3] [5][4] [5][5] [5][6] [5][7]
+2  [6][0] [6][1] [6][2] [6][3] [6][4] [6][5] [6][6] [6][7]
+1  [7][0] [7][1] [7][2] [7][3] [7][4] [7][5] [7][6] [7][7]
+   a      b      c      d      e      f      g      h
 
 Starting position - one possibility to make it easy to visualise in the code itself:
 board = [
@@ -199,25 +200,154 @@ Black:  ♚♛♜♝♞♟︎
 3
 2♙♙♙♙♙♙♙♙
 1♖♘♗♕♔♗♘♖
-.abcdefgh
+abcdefgh
 
-Colorize options:
-black
-red
-green
-yellow
-blue
-magenta
-cyan
-white
-default
-light_black
-light_red
-light_green
-light_yellow
-light_blue
-light_magenta
-light_cyan
-light_white
-grey
-gray
+
+Algebraic notation
+
+Will need a Move object I'm pretty sure - but wait for that
+
+Nb3
+Pe4 is written as e4
+bxe5 means pawn on b-file takes e5 - Bxe5 means Bishop x e5 - so can't control case.
+
+Captures - x
+Note that the capture indication is completely unnecessary and can be omitted.
+I think strip out the x's and make it work regardless.
+
+Disambiguating moves
+If two rooks can move to same square:
+Rab3
+or
+R5b3
+If two queens can move to same square may be necessary to have both
+Qh4e1
+
+Promotion - just e8
+
+Castling
+0-0 or 0-0-0
+
+Check - append the + but this will be done internally. Strip them out.
+
+Draw offer
+(=)
+
+checkmate
+#
+
+End of game:
+1-0 White won
+0-1 Black won
+½-½ Draw
+
+1. e4 e5
+2. Nf3 Nc6
+3. Bb5 a6
+
+OK let's try some rules.
+Special moves to check for first:
+O-O
+O-O-O
+If the first letter is lowercase, put P in front of it.
+Strip out any 'x'.
+* The first letter is always the piece: KQRBNP
+* The last two letters are always the destination square.
+If the string is 4 characters long the second character is the disambiguating row or colum.
+If the string is 5 characters long, the second and third character is disambiguation.
+Qh4e1
+So pseudocode for validation - goal is to map the input to a standardised ['N', [5, 1]] format for Nb3:
+- Check for Castling O-O or O-O-O
+- Strip out x and any other character that is not:
+  - [abcdefgh12345678KQRBNP] 
+- add P to start of start of string if first letter is lowercase
+- return nil if length of string is less than 3 or greater than 5
+- Add the first letter as the piece n -> ['N']
+- Add [] as the origin.
+- Map the last two letters as the destination square b3 -> [5, 2]
+- If the string is 4 letters long, map the 2nd letter to origin
+- If the string is 5 letters long, map both 2nd and 3rd letter to origin
+
+Nf3
+Nf6
+Pc4
+Pg6
+Nc3
+Bg7
+Pd4
+O-O
+Bf4
+Pd5
+Qb3
+dc4
+Qc4
+Pc6
+Pe4
+Nbd7
+Rd1
+Nb6
+Qc5
+Bg4
+Bg5
+Na4
+Qa3
+Nc3
+bc3
+Ne4
+Be7
+Qb6
+Bc4
+Nc3
+Bc5
+Rfe8
+Kf1
+Be6
+Bb6
+Bc4
+Kg1
+Ne2
+Kf1
+Nd4
+Kg1
+Ne2
+Kf1
+Nc3
+Kg1
+ab6
+Qb4
+Ra4
+Qb6
+Nd1
+Ph3
+Ra2
+Kh2
+Nf2
+Re1
+Re1
+Qd8
+Bf8
+Ne1
+Bd5
+Nf3
+Ne4
+Qb8
+Pb5
+Ph4
+Ph5
+Ne5
+Kg7
+Kg1
+Bc5
+Kf1
+Ng3
+Ke1
+Bb4
+Kd1
+Bb3
+Kc1
+Ne2
+Kb1
+Nc3
+Kc1
+Rc2
+
