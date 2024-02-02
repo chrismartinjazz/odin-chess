@@ -2,7 +2,7 @@
 
 require 'colorize'
 
-require_relative 'Pieces'
+require_relative 'pieces'
 
 # Holds the pieces and finds legal moves
 class GameBoard
