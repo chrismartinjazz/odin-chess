@@ -6,6 +6,21 @@ class Pieces
   @@knight = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
 end
 
+class Pawn < Pieces
+  attr_accessor :color, :step_pairs, :max_move, :step_pair_movement, :step_pairs_capture
+
+  def initialize(color)
+    @color = color
+    @step_pair_movement = @color == 'W' ? [-1, 0] : [1, 0]
+    @step_pairs_capture = @color == 'W' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]
+    @max_move = 1
+  end
+
+  def to_s
+    @color == 'W' ? 'P' : 'p'
+  end
+end
+
 class Knight < Pieces
   attr_accessor :color, :step_pairs, :max_move
 

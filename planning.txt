@@ -221,10 +221,14 @@ Move 4 knights - now have two players taking turns.
 * DONE
 
 Add bishops, rooks, queens, kings (still no check)
+* DONE
 
-Add Pawns. At this point can play a full game.
+Add Pawns. At this point can play a full game (with humans enforcing check rules and end of game, and no castling)
+* DONE
 
 Add 'in_check?'
+Add castling
+Add pawn promotion
 Add 'result?'
 
 Add save and load

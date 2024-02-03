@@ -57,7 +57,6 @@ describe GameBoard do
       board_display = game_board_knight.display
       expect(board_display).to include('♞')
       expect(board_display).not_to include('N')
-
     end
   end
 
@@ -120,6 +119,44 @@ describe GameBoard do
       expect(game_board_main_pieces.board[7][5]).to be_a Bishop
       expect(game_board_main_pieces.board[7][6]).to be_a Knight
       expect(game_board_main_pieces.board[7][7]).to be_a Rook
+    end
+  end
+
+  four_pawns = %w[
+    ........
+    p.......
+    ........
+    ........
+    P.......
+    .p......
+    P.......
+    ........
+  ]
+
+  subject(:game_board_four_pawns) { described_class.new(four_pawns)}
+  context 'when the board has four pawns' do
+    it 'initializes with pawns of correct color' do
+      expect(game_board_four_pawns.board[1][0]).to be_a Pawn
+      expect(game_board_four_pawns.board[6][0]).to be_a Pawn
+      expect(game_board_four_pawns.board[1][0].color).to eql('B')
+      expect(game_board_four_pawns.board[6][0].color).to eql('W')
+    end
+
+    it 'finds the legal moves for the white pawns' do
+      expect(game_board_four_pawns.legal_moves('W')).to eql([
+        ['P', [4, 0], [3, 0]],
+        ['P', [6, 0], [5, 0]],
+        ['P', [6, 0], [5, 1]]
+      ])
+    end
+
+    it 'finds the legal moves for the black pawns' do
+      expect(game_board_four_pawns.legal_moves('B')).to eql([
+        ['p', [1, 0], [2, 0]],
+        ['p', [1, 0], [3, 0]],
+        ['p', [5, 1], [6, 1]],
+        ['p', [5, 1], [6, 0]],
+      ])
     end
   end
 end

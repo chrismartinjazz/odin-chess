@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'colorize'
-
 require_relative 'pieces'
 
 # Holds the pieces and finds legal moves
@@ -35,6 +34,8 @@ class GameBoard
       Queen.new(color)
     when 'K', 'k'
       King.new(color)
+    when 'P', 'p'
+      Pawn.new(color)
     end
   end
 
@@ -54,7 +55,11 @@ class GameBoard
         next unless @board[row_i][col_i].color == color
 
         piece = @board[row_i][col_i]
-        legal_moves += (find_moves(piece, [row_i, col_i]))
+        if piece.is_a?(Pawn)
+          legal_moves += (find_pawn_moves(piece, [row_i, col_i]))
+        else
+          legal_moves += (find_moves(piece, [row_i, col_i]))
+        end
       end
     end
     legal_moves
@@ -87,6 +92,45 @@ class GameBoard
       end
     end
     moves
+  end
+
+  def find_pawn_moves(pawn, start)
+    pawn_moves = []
+    max_move = if (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1)
+                 2
+               else
+                 1
+               end
+    # For each possible movement (not capturing)
+    step = pawn.step_pair_movement
+    # Up to as many squares as it can travel
+    (1..max_move).each do |squares|
+      # Locate the finishing square
+      finish_sq = [start[0] + (step[0] * squares), start[1]]
+      # Store the occupant of the finish square
+      finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+      # If it is empty, we can move there - store it and continue.
+      if finish_occupant.nil?
+        pawn_moves.push([pawn.to_s, start, finish_sq])
+        next
+      # Otherwise, break.
+      else
+        break
+      end
+    end
+    # For each possible capture
+    pawn.step_pairs_capture.each do |step|
+      finish_sq = [start[0] + step[0], start[1] + step[1]]
+      # Go to the next move direction if it is off the board
+      break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
+
+      # Store the occupant of the finish square
+      finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+      next if finish_occupant.nil?
+      # If it is occupied by an opposing piece, we can capture it, add to legal moves
+      pawn_moves.push([pawn.to_s, start, finish_sq]) if finish_occupant.color != pawn.color
+    end
+    pawn_moves
   end
 
   def display
