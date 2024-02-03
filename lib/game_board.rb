@@ -39,10 +39,13 @@ class GameBoard
     end
   end
 
-  # A move has format [<piece>, <origin>, <destination>]
+  # A move has format [<piece>, <origin>, <destination>].
+  # Returns the initial occupant of the destination square (nil, or a Piece)
   def move_piece(move)
+    destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
+    destination_square_occupant
   end
 
   def legal_moves(color)
@@ -80,11 +83,13 @@ class GameBoard
         finish_occupant = @board[finish_sq[0]][finish_sq[1]]
         # If it is empty, we can move there - store it and continue.
         if finish_occupant.nil?
-          moves.push([piece.to_s, start, finish_sq])
+          move = [piece.to_s, start, finish_sq]
+          moves.push(move) unless test_for_check?(move)
           next
         # If it is occupied by an opposing piece, we can capture it, add to legal moves
         elsif finish_occupant.color != piece.color
-          moves.push([piece.to_s, start, finish_sq])
+          move = [piece.to_s, start, finish_sq]
+          moves.push(move) unless test_for_check?(move)
         end
         # If we have reached this line, we have either stored the capture move, or
         # we are looking at a piece of our own color - so go to the next move direction.
@@ -111,7 +116,8 @@ class GameBoard
       finish_occupant = @board[finish_sq[0]][finish_sq[1]]
       # If it is empty, we can move there - store it and continue.
       if finish_occupant.nil?
-        pawn_moves.push([pawn.to_s, start, finish_sq])
+        pawn_move = [pawn.to_s, start, finish_sq]
+        pawn_moves.push(pawn_move) unless test_for_check?(pawn_move)
         next
       # Otherwise, break.
       else
@@ -124,17 +130,34 @@ class GameBoard
       # Go to the next move direction if it is off the board
       break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 
-      # Store the occupant of the finish square
+      # Store the occupant of the finish square.
+      # Go to next move direction unless it is an opposing piece.
       finish_occupant = @board[finish_sq[0]][finish_sq[1]]
-      next if finish_occupant.nil?
+      next if finish_occupant.nil? || finish_occupant.color != pawn.color
+
       # If it is occupied by an opposing piece, we can capture it, add to legal moves
-      pawn_moves.push([pawn.to_s, start, finish_sq]) if finish_occupant.color != pawn.color
+      pawn_move = [pawn.to_s, start, finish_sq]
+      pawn_moves.push() unless test_for_check?(pawn_move)
     end
     pawn_moves
   end
 
+  def test_for_check?(move)
+    player_color = move[0].ord < 97 ? 'W' : 'B'
+    # Make the move and test for check
+    original_occupant = move_piece(move)
+    in_check = in_check?(player_color)
+    # Undo the move - reverse it and restore original occupant
+    move_piece([move[0], move[2], move[1]])
+    @board[move[2][0]][move[2][1]] = original_occupant
+    # Return the true or false result
+    in_check
+  end
+
   def in_check?(color)
     king_position = find_king(color)
+    return false if king_position.nil?
+
     opponent_color = color == 'W' ? 'B' : 'W'
     opponent_legal_moves = legal_moves(opponent_color)
     opponent_legal_moves.each do |move|
@@ -151,8 +174,8 @@ class GameBoard
         end
       end
     end
+    nil
   end
-
 
   def display
     board_copy = []
@@ -191,15 +214,14 @@ class GameBoard
   end
 end
 
-# in_check = %w[
-#       k.......
-#       ........
-#       R.......
-#       ........
-#       ........
-#       ........
-#       ........
-#       ........
-#     ]
-# GameBoard.new(in_check).in_check?('B')
-# p GameBoard.new(main_pieces).legal_moves('W')
+one_knight = %w[
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    N.......
+  ]
+GameBoard.new(one_knight).legal_moves('W')

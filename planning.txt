@@ -335,11 +335,11 @@ So:
 (As part of this - modify the move_piece method to return the captured piece or nil)
 #avoid_moving_into_check
 That identifies IF in check. Now, we need to remove legal_moves that do not get us out of check.
-- For each legal move
+- For each legal move once it is identified
   - Make the move on the board, with the capacity to undo it (i.e. store any captured piece temporarily)
-  - Retrieve the opponent's legal moves in new position.
+  - Is current player in_check?
   - Undo the move (restoring any captured piece)
-  - If any of the opponent's legal moves include a destination of the king's current square, remove that move from the array.
+  - If current player is in check, next - otherwise add the move.
 - End loop
 
 Next we need to deal with 'moving into check'.

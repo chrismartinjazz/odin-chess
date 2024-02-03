@@ -185,9 +185,14 @@ describe GameBoard do
       end
     end
 
-    describe 'avoid_moving_into_check' do
+    describe '#avoid_moving_into_check' do
       it 'removes moves that are in check' do
-        expect(game_board_in_check.legal_moves('B')).to eql([
+        initial_legal_moves = [
+          ["k", [0, 0], [1, 1]],
+          ["k", [0, 0], [1, 0]],
+          ["k", [0, 0], [0, 1]]
+        ]
+        expect(game_board_in_check.avoid_moving_into_check()).to eql([
           ["k", [0, 0], [1, 1]],
           ["k", [0, 0], [0, 1]]
         ])
