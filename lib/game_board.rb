@@ -133,6 +133,27 @@ class GameBoard
     pawn_moves
   end
 
+  def in_check?(color)
+    king_position = find_king(color)
+    opponent_color = color == 'W' ? 'B' : 'W'
+    opponent_legal_moves = legal_moves(opponent_color)
+    opponent_legal_moves.each do |move|
+      return true if move[2] == king_position
+    end
+    false
+  end
+
+  def find_king(color)
+    (0..7).each do |row_i|
+      (0..7).each do |col_i|
+        if @board[row_i][col_i].is_a?(King) && @board[row_i][col_i].color == color
+          return [row_i, col_i]
+        end
+      end
+    end
+  end
+
+
   def display
     board_copy = []
     (0..7).each do |row_i|
@@ -170,15 +191,15 @@ class GameBoard
   end
 end
 
-# main_pieces = %w[
-#   rnbqkbnr
-#   ........
-#   ........
-#   ........
-#   ........
-#   ........
-#   ........
-#   RNBQKBNR
-# ]
-# p GameBoard.new(main_pieces).legal_moves('B')
+# in_check = %w[
+#       k.......
+#       ........
+#       R.......
+#       ........
+#       ........
+#       ........
+#       ........
+#       ........
+#     ]
+# GameBoard.new(in_check).in_check?('B')
 # p GameBoard.new(main_pieces).legal_moves('W')

@@ -159,4 +159,42 @@ describe GameBoard do
       ])
     end
   end
+
+  in_check = %w[
+      k.......
+      ........
+      R.......
+      ........
+      ........
+      ........
+      ........
+      ........
+    ]
+  subject (:game_board_in_check) { described_class.new(in_check) }
+
+  context 'when in check with white rook and black king' do
+    describe '#find_king' do
+      it 'finds the black king on square a8' do
+        expect(game_board_in_check.find_king('B')).to eql([0, 0])
+      end
+    end
+
+    describe '#in_check?' do
+      it 'identifies that black is in check on their move' do
+        expect(game_board_in_check.in_check?('B')).to be true
+      end
+    end
+
+    describe 'avoid_moving_into_check' do
+      it 'removes moves that are in check' do
+        expect(game_board_in_check.legal_moves('B')).to eql([
+          ["k", [0, 0], [1, 1]],
+          ["k", [0, 0], [0, 1]]
+        ])
+      end
+    end
+    it 'returns'
+  end
+
+
 end

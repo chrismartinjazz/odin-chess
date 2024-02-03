@@ -246,7 +246,7 @@ Black:  ♚♛♜♝♞♟︎
 3
 2♙♙♙♙♙♙♙♙
 1♖♘♗♕♔♗♘♖
-abcdefgh
+a b c d e f g h
 
 
 Algebraic notation
@@ -314,6 +314,41 @@ So pseudocode for validation - goal is to map the input to a standardised ['N', 
 - If the string is 4 letters long, map the 2nd letter to origin
 - If the string is 5 letters long, map both 2nd and 3rd letter to origin
 
+Planning for 'check'.
+I will resist looking this up at all and just think it through.
+It seems like this will exponentially increase the computational complexity so will be interesting.
+
+Definition of in check = It is my move. If it were my opponent's move, at least one of their pieces has a move with destination square = my king's square.
+
+If not in check - can make any normal move (that doesn't put in check).
+
+If in check - any move that is also in check is now illegal.
+
+If there are no legal moves - that triggers win condition.
+
+So:
+#in_check?
+- Retrieve the array of legal moves, and the position of the king.
+- Retrieve the opponent's legal moves in current position.
+- If any opponent moves have destination == king position, you are in check.
+
+(As part of this - modify the move_piece method to return the captured piece or nil)
+#avoid_moving_into_check
+That identifies IF in check. Now, we need to remove legal_moves that do not get us out of check.
+- For each legal move
+  - Make the move on the board, with the capacity to undo it (i.e. store any captured piece temporarily)
+  - Retrieve the opponent's legal moves in new position.
+  - Undo the move (restoring any captured piece)
+  - If any of the opponent's legal moves include a destination of the king's current square, remove that move from the array.
+- End loop
+
+Next we need to deal with 'moving into check'.
+Actually this collapses to the removing legal_moves step above. We now need to do this for every legal_move, always, before returning it - check if it places us 'in_check?'
+
+Thinking this through - being in check and moving into check collapse into the same thing. You cannot move in a way that allows your opponent to capture your king. So, I simply need to implement the in_check? and avoid_moving_into_check methods (I think).
+
+
+Game of the century!
 Nf3
 Nf6
 Pc4
