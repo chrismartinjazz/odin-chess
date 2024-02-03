@@ -29,9 +29,10 @@ class GameBoard
     end
   end
 
-  def move(move_start, move_end)
-    @board[move_end[0]][move_end[1]] = @board[move_start[0]][move_start[1]]
-    @board[move_start[0]][move_start[1]] = nil
+  # A move has format [<piece>, <origin>, <destination>]
+  def move_piece(move)
+    @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
+    @board[move[1][0]][move[1][1]] = nil
   end
 
   def legal_moves
@@ -51,11 +52,11 @@ class GameBoard
   def find_moves(piece, start)
     moves = []
     # For each direction the piece can move
-    piece.move_i.each do |move|
+    piece.step_pairs.each do |step|
       # Up to as many squares as it can travel
       (1..piece.max_move).each do |squares|
         # Locate the finishing square
-        finish_sq = [start[0] + (move[0] * squares), start[1] + (move[1] * squares)]
+        finish_sq = [start[0] + (step[0] * squares), start[1] + (step[1] * squares)]
         # Go to the next move direction if it is off the board
         break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 
@@ -124,4 +125,5 @@ end
 #     ........
 #     N.......
 #   ]
-# GameBoard.new(one_knight).display
+# GameBoard.new(one_knight).move_piece(['N', [7, 0], [5, 1]])
+# GameBoard.display

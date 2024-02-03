@@ -1,5 +1,34 @@
 Planning - Chess in command line.
 
+---
+Emerging definitions:
+a move is a piece and two arrays, inside an array. If the piece doesn't matter,
+the piece is nil.
+
+move = [nil, [7, 0], [5, 1]]  # a1 - b3
+move[0] # piece
+
+move[1] # origin square 
+move[2] # destination square
+
+move[1][0] origin row
+move[1][1] origin col
+
+move[2][0] dest row
+move[2][1] dest col
+
+It is passed around as a piece_move pair:
+Nb3 = ['N', [7, 0], [5, 1]]
+0-0 = ['K', [7, 4], [7, 6]]
+I am not sure if identifying the color, by up or down case, is necessary.
+
+Given the proliferation of moves I'm trying to keep them as small and concrete as possible.
+
+Depending on the section of the application, the piece or origin can both be nil.
+
+Given I am refactoring to use this new type - probably I should just create a new class Move, with piece, color, origin, destination and be done with it.
+---
+
 Key elements we will need:
 - Chess
     - Holds on to the players, board. Can call the save_manager.
@@ -25,15 +54,13 @@ Game flow:
 INIT the game, board, pieces and players.
 DISPLAY the board and players.
 WHILE game is not over:
+  ASK board for legal moves.
+    IF there are no legal moves, the game is won, trigger winning condition.
   ASK next player for move.
-  COMPUTE move and send interpreted move information to board.
-  Board COMPUTES if this move is legal.
-    IF legal, update board, returns board for display
-    ELSE IF illegal, returns error messages
-  Game ASKS Board 'in_check?'
-  Game ASKS Board 'won?'
+  VALIDATE move and send interpreted move information to board.
+    UPDATE board, display board
   (I think I will skip 'position repeated three times draw', and at least initially en passant)
-  Game DISPLAYS board and gives player feedback on move (check / checkmate / stalemate etc.)
+  Game DISPLAYS board and move list (flags for 'Check')
 END
 DISPLAY winner message and offer to play new game.
 IF play new game:
@@ -169,6 +196,19 @@ Move a single knight around the board using an interface
 - Find its legal moves and return them (skip in_check?) in a format like ['N' [5, 2], [6, 1]] (for a knight on a1)
 - Build game shell, player object, simple interface.
 - Player inputs a move, if it is in the legal moves set, the game_board moves it.
+  - Pseudocode for this game shell
+  - Loop
+    - Chess collects valid moves from GameBoard
+    - Chess asks GameBoard to display its board
+    - Loop until valid move
+      - (While building - Chess prints the valid moves)
+      - Chess asks Player their move
+      - MoveConverter converts the player move to standard format or returns nil
+      - Chess checks if Player's move is a legal move, returns nil if not
+    - End loop
+    - Chess sends valid move to GameBoard
+  - End loop
+
 
 Move two knights of the same color
 - Add another knight
