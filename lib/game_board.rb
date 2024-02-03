@@ -13,19 +13,28 @@ class GameBoard
   end
 
   def read_position(pos)
-    new_pos = []
+    new_position = []
     (0..7).each do |row|
-      new_pos.push(pos[row].split('').map { |char| char_to_piece(char) })
+      new_position.push(pos[row].split('').map { |char| char_to_piece(char) })
     end
-    new_pos
+    new_position
   end
 
   def char_to_piece(char)
+    color = char.ord < 97 ? 'W' : 'B'
     case char
     when '.'
       nil
-    when 'N'
-      Knight.new('white')
+    when 'N', 'n'
+      Knight.new(color)
+    when 'R', 'r'
+      Rook.new(color)
+    when 'B', 'b'
+      Bishop.new(color)
+    when 'Q', 'q'
+      Queen.new(color)
+    when 'K', 'k'
+      King.new(color)
     end
   end
 
@@ -35,12 +44,14 @@ class GameBoard
     @board[move[1][0]][move[1][1]] = nil
   end
 
-  def legal_moves
+  def legal_moves(color)
     legal_moves = []
 
     (0..7).each do |row_i|
       (0..7).each do |col_i|
         next if @board[row_i][col_i].nil?
+
+        next unless @board[row_i][col_i].color == color
 
         piece = @board[row_i][col_i]
         legal_moves += (find_moves(piece, [row_i, col_i]))
@@ -115,15 +126,15 @@ class GameBoard
   end
 end
 
-# one_knight = %w[
-#     ........
-#     ........
-#     ........
-#     ........
-#     ........
-#     ........
-#     ........
-#     N.......
-#   ]
-# GameBoard.new(one_knight).move_piece(['N', [7, 0], [5, 1]])
-# GameBoard.display
+# main_pieces = %w[
+#   rnbqkbnr
+#   ........
+#   ........
+#   ........
+#   ........
+#   ........
+#   ........
+#   RNBQKBNR
+# ]
+# p GameBoard.new(main_pieces).legal_moves('B')
+# p GameBoard.new(main_pieces).legal_moves('W')

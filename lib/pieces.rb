@@ -1,15 +1,77 @@
 # frozen_string_literal: true
 
-class Knight
+class Pieces
+  @@orthogonal = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+  @@diagonal = [[-1, 1], [-1, -1], [1, 1], [1, -1]]
+  @@knight = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
+end
+
+class Knight < Pieces
   attr_accessor :color, :step_pairs, :max_move
 
   def initialize(color)
     @color = color
-    @step_pairs = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]
+    @step_pairs = @@knight
     @max_move = 1
   end
 
   def to_s
-    'N'
+    @color == 'W' ? 'N' : 'n'
+  end
+end
+
+class Rook < Pieces
+  attr_accessor :color, :step_pairs, :max_move
+
+  def initialize(color)
+    @color = color
+    @step_pairs = @@orthogonal
+    @max_move = 7
+  end
+
+  def to_s
+    @color == 'W' ? 'R' : 'r'
+  end
+end
+
+class Bishop < Pieces
+  attr_accessor :color, :step_pairs, :max_move
+
+  def initialize(color)
+    @color = color
+    @step_pairs = @@diagonal
+    @max_move = 7
+  end
+
+  def to_s
+    @color == 'W' ? 'B' : 'b'
+  end
+end
+
+class Queen < Pieces
+  attr_accessor :color, :step_pairs, :max_move
+
+  def initialize(color)
+    @color = color
+    @step_pairs = @@diagonal + @@orthogonal
+    @max_move = 7
+  end
+
+  def to_s
+    @color == 'W' ? 'Q' : 'q'
+  end
+end
+
+class King < Pieces
+  attr_accessor :color, :step_pairs, :max_move
+
+  def initialize(color)
+    @color = color
+    @step_pairs = @@diagonal + @@orthogonal
+    @max_move = 1
+  end
+
+  def to_s
+    @color == 'W' ? 'K' : 'k'
   end
 end

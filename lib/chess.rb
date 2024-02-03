@@ -8,14 +8,16 @@ class Chess
   def initialize(position = nil)
     @game_board = GameBoard.new(position)
     @player1 = Player.new('W')
+    @player2 = Player.new('B')
     @move_converter = MoveConverter.new
     @current_player = @player1
   end
 
   def game_loop
     loop do
-      legal_moves = @game_board.legal_moves
+      legal_moves = @game_board.legal_moves(@current_player.color)
       puts
+      puts @current_player.color
       puts @game_board.display
       p legal_moves
       accepted_move = false
@@ -25,6 +27,7 @@ class Chess
         accepted_move = in_legal_moves(converted_move, legal_moves)
       end
       @game_board.move_piece(accepted_move)
+      next_player
     end
   end
 
@@ -49,17 +52,20 @@ class Chess
       false
     end
   end
+
+  def next_player
+    @current_player = @current_player == @player1 ? @player2 : @player1
+  end
 end
 
-one_knight = %w[
-    ........
-    ........
-    ........
-    ........
-    ........
-    ........
-    ........
-    N.......
-  ]
-
-Chess.new(one_knight).game_loop
+main_pieces = %w[
+  rnbqkbnr
+  ........
+  ........
+  ........
+  ........
+  ........
+  ........
+  RNBQKBNR
+]
+Chess.new(main_pieces).game_loop

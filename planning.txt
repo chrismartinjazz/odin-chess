@@ -208,15 +208,17 @@ Move a single knight around the board using an interface
     - End loop
     - Chess sends valid move to GameBoard
   - End loop
-
+* DONE
 
 Move two knights of the same color
 - Add another knight
 - Board won't move the knight on top of that knight
+* DONE
 
 Move 4 knights - now have two players taking turns.
 - Add two more knights
 - Board will allow capturing moves
+* DONE
 
 Add bishops, rooks, queens, kings (still no check)
 

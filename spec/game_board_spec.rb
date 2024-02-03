@@ -30,7 +30,7 @@ describe GameBoard do
   ]
 
   subject(:game_board_knight) { described_class.new(one_knight)}
-  context 'When the board has just one knight' do
+  context 'When the board has just one white knight' do
     it 'initializes to a white knight in the corner with appropriate argument' do
       expect(game_board_knight.board[7][0]).to be_a Knight
       expect(game_board_knight.board[7][1]).to be nil
@@ -47,7 +47,7 @@ describe GameBoard do
     end
 
     it 'returns the legal moves of the knight' do
-      expect(game_board_knight.legal_moves).to eq([
+      expect(game_board_knight.legal_moves('W')).to eq([
         ['N', [7, 0], [5, 1]],
         ['N', [7, 0], [6, 2]]
       ])
@@ -60,15 +60,66 @@ describe GameBoard do
 
     end
   end
-end
 
-# prnbqk PRNBQK
-# %w['........',
-#  '........',
-#  '........',
-#  '........',
-#  '........',
-#  '........',
-#  '........',
-#  'N.......''
-#  ]
+  two_knights = %w[
+    n.......
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    N.......
+  ]
+
+  subject(:game_board_two_knights) { described_class.new(two_knights)}
+  context 'When the board has one black and one white knight' do
+    it 'initializes to knights in the corner with appropriate argument' do
+      expect(game_board_two_knights.board[7][0]).to be_a Knight
+      expect(game_board_two_knights.board[7][1]).to be nil
+      expect(game_board_two_knights.board[0][0]).to be_a Knight
+      expect(game_board_two_knights.board[1][0]).to be nil
+      expect(game_board_two_knights.board[7][0].color).to eql('W')
+      expect(game_board_two_knights.board[0][0].color).to eql('B')
+    end
+
+    it 'returns the legal moves of the white knight' do
+      expect(game_board_two_knights.legal_moves('W')).to eq([
+        ['N', [7, 0], [5, 1]],
+        ['N', [7, 0], [6, 2]]
+      ])
+    end
+
+    it 'returns the legal moves of the black knight' do
+      expect(game_board_two_knights.legal_moves('B')).to eq([
+        ['n', [0, 0], [1, 2]],
+        ['n', [0, 0], [2, 1]]
+      ])
+    end
+  end
+
+  main_pieces = %w[
+    rnbqkbnr
+    ........
+    ........
+    ........
+    ........
+    ........
+    ........
+    RNBQKBNR
+  ]
+
+  subject(:game_board_main_pieces) { described_class.new(main_pieces)}
+  context 'when the board has all major pieces and no pawns' do
+    it 'initializes row 1 with correct piece types' do
+      expect(game_board_main_pieces.board[7][0]).to be_a Rook
+      expect(game_board_main_pieces.board[7][1]).to be_a Knight
+      expect(game_board_main_pieces.board[7][2]).to be_a Bishop
+      expect(game_board_main_pieces.board[7][3]).to be_a Queen
+      expect(game_board_main_pieces.board[7][4]).to be_a King
+      expect(game_board_main_pieces.board[7][5]).to be_a Bishop
+      expect(game_board_main_pieces.board[7][6]).to be_a Knight
+      expect(game_board_main_pieces.board[7][7]).to be_a Rook
+    end
+  end
+end

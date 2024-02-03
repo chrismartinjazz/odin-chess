@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MoveConverter
-  def convert(move, color = 'W')
+  def convert(move, color)
     return check_castling(move, color) if check_castling(move, color)
 
     return nil unless attempted_move?(move)
@@ -17,14 +17,15 @@ class MoveConverter
 
     # Move is now 3-5 characters, in format:
     # Piece, (opt. disambiguation 1, opt. disambiguation 2), destination column, destination row
-    alg_move_to_array(alg_move)
+    alg_move_to_array(alg_move, color)
   end
 
   def check_castling(move, color)
     king_row = color == 'B' ? 0 : 7
-    return ['K', [king_row, 4], [king_row, 6]] if move == 'O-O' || move == '0-0'
+    king_letter = color == 'B' ? 'k' : 'K'
+    return [king_letter, [king_row, 4], [king_row, 6]] if move == 'O-O' || move == '0-0'
 
-    return ['K', [king_row, 4], [king_row, 2]] if move == 'O-O-O' || move == '0-0-0'
+    return [king_letter, [king_row, 4], [king_row, 2]] if move == 'O-O-O' || move == '0-0-0'
 
     false
   end
@@ -43,10 +44,11 @@ class MoveConverter
     alg_move
   end
 
-  def alg_move_to_array(alg_move)
+  def alg_move_to_array(alg_move, color)
     alg_map = [
       [nil, '8', '7', '6', '5', '4', '3', '2', '1', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
-      [nil, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7]]
+      [nil, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7]
+    ]
 
     dest_row = alg_map[1][alg_map[0].index(alg_move.slice(-1))]
     dest_col = alg_map[1][alg_map[0].index(alg_move.slice(-2))]
@@ -63,6 +65,8 @@ class MoveConverter
     end
 
     move_array = [alg_move.slice(0), [orig_row, orig_col], [dest_row, dest_col]]
+    move_array[0].downcase! if color == 'B'
+    move_array
   end
 
   def valid_move?(move)
