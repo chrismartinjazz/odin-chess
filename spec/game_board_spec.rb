@@ -53,7 +53,7 @@ describe GameBoard do
                                                        ])
     end
 
-    fit 'returns a string representing the board' do
+    it 'returns a string representing the board' do
       board_display = game_board_knight.display
       expect(board_display).to include('♞')
       expect(board_display).not_to include('N')

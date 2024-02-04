@@ -45,6 +45,7 @@ class GameBoard
 
   def find_moves(piece, start, testing_for_check)
     moves = []
+    king_position = testing_for_check ? find_king(piece.color) : nil
     # For each direction the piece can move
     piece.step_pairs.each do |step|
       # Up to as many squares as it can travel
@@ -76,11 +77,7 @@ class GameBoard
 
   def find_pawn_moves(pawn, start, testing_for_check)
     pawn_moves = []
-    max_move = if (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1)
-                 2
-               else
-                 1
-               end
+    max_move = (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1) ? 2 : 1
     # For each possible movement (not capturing)
     step = pawn.step_pair_movement
     # Up to as many squares as it can travel
@@ -150,39 +147,6 @@ class GameBoard
 
   def display
     @board_displayer.display(@board)
-    # board_copy = []
-    # (0..7).each do |row_i|
-    #   new_row = @board[row_i].map { |elem| elem.nil? ? '.' : elem.to_s }
-    #   board_copy << new_row
-    # end
-
-    # piece_map = [
-    #   ['.', 'K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'],
-    #   ['  ', '♚ ', '♛ ', '♜ ', '♝ ', '♞ ', '♟︎ ', '♔ ', '♕ ', '♖ ', '♗ ', '♘ ', '♙ ']
-    # ]
-
-    # (0..7).each do |row_i|
-    #   board_copy[row_i].map! { |char| piece_map[1][piece_map[0].index(char) ] }
-    # end
-
-    # str = ''
-    # [0, 2, 4, 6].each do |row_pair|
-    #   # First row in pair
-    #   str += "#{8 - row_pair} "
-    #   [0, 2, 4, 6].each do |col_pair|
-    #     str += board_copy[row_pair][col_pair].on_grey
-    #     str += board_copy[row_pair][col_pair + 1].on_magenta
-    #   end
-    #   str += "\n"
-    #   # Second row in pair
-    #   str += "#{8 - row_pair - 1} "
-    #   [0, 2, 4, 6].each do |col_pair|
-    #     str += board_copy[row_pair + 1][col_pair].on_magenta
-    #     str += board_copy[row_pair + 1][col_pair + 1].on_grey
-    #   end
-    #   str += "\n"
-    # end
-    # str + "  a b c d e f g h\n"
   end
 end
 
