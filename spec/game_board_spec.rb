@@ -29,7 +29,7 @@ describe GameBoard do
     N.......
   ]
 
-  subject(:game_board_knight) { described_class.new(one_knight)}
+  subject(:game_board_knight) { described_class.new(one_knight) }
   context 'When the board has just one white knight' do
     it 'initializes to a white knight in the corner with appropriate argument' do
       expect(game_board_knight.board[7][0]).to be_a Knight
@@ -38,7 +38,7 @@ describe GameBoard do
     end
 
     describe '#move_piece' do
-      it "moves the knight to the square b3 with move (piece, starting, ending squares)" do
+      it 'moves the knight to the square b3 with move (piece, starting, ending squares)' do
         board_before_move = game_board_knight.board
         game_board_knight.move_piece(['N', [7, 0], [5, 1]])
         expect(game_board_knight.board[7][0]).to be nil
@@ -48,12 +48,12 @@ describe GameBoard do
 
     it 'returns the legal moves of the knight' do
       expect(game_board_knight.legal_moves('W')).to eq([
-        ['N', [7, 0], [5, 1]],
-        ['N', [7, 0], [6, 2]]
-      ])
+                                                         ['N', [7, 0], [5, 1]],
+                                                         ['N', [7, 0], [6, 2]]
+                                                       ])
     end
 
-    it 'returns a string representing the board' do
+    fit 'returns a string representing the board' do
       board_display = game_board_knight.display
       expect(board_display).to include('♞')
       expect(board_display).not_to include('N')
@@ -71,7 +71,7 @@ describe GameBoard do
     N.......
   ]
 
-  subject(:game_board_two_knights) { described_class.new(two_knights)}
+  subject(:game_board_two_knights) { described_class.new(two_knights) }
   context 'When the board has one black and one white knight' do
     it 'initializes to knights in the corner with appropriate argument' do
       expect(game_board_two_knights.board[7][0]).to be_a Knight
@@ -84,16 +84,16 @@ describe GameBoard do
 
     it 'returns the legal moves of the white knight' do
       expect(game_board_two_knights.legal_moves('W')).to eq([
-        ['N', [7, 0], [5, 1]],
-        ['N', [7, 0], [6, 2]]
-      ])
+                                                              ['N', [7, 0], [5, 1]],
+                                                              ['N', [7, 0], [6, 2]]
+                                                            ])
     end
 
     it 'returns the legal moves of the black knight' do
       expect(game_board_two_knights.legal_moves('B')).to eq([
-        ['n', [0, 0], [1, 2]],
-        ['n', [0, 0], [2, 1]]
-      ])
+                                                              ['n', [0, 0], [1, 2]],
+                                                              ['n', [0, 0], [2, 1]]
+                                                            ])
     end
   end
 
@@ -108,7 +108,7 @@ describe GameBoard do
     RNBQKBNR
   ]
 
-  subject(:game_board_main_pieces) { described_class.new(main_pieces)}
+  subject(:game_board_main_pieces) { described_class.new(main_pieces) }
   context 'when the board has all major pieces and no pawns' do
     it 'initializes row 1 with correct piece types' do
       expect(game_board_main_pieces.board[7][0]).to be_a Rook
@@ -133,7 +133,7 @@ describe GameBoard do
     ........
   ]
 
-  subject(:game_board_four_pawns) { described_class.new(four_pawns)}
+  subject(:game_board_four_pawns) { described_class.new(four_pawns) }
   context 'when the board has four pawns' do
     it 'initializes with pawns of correct color' do
       expect(game_board_four_pawns.board[1][0]).to be_a Pawn
@@ -154,25 +154,25 @@ describe GameBoard do
 
     it 'finds the legal moves for the black pawns' do
       expect(game_board_four_pawns.legal_moves('B')).to eql([
-        ['p', [1, 0], [2, 0]],
-        ['p', [1, 0], [3, 0]],
-        ['p', [5, 1], [6, 1]],
-        ['p', [5, 1], [6, 0]],
-      ])
+                                                              ['p', [1, 0], [2, 0]],
+                                                              ['p', [1, 0], [3, 0]],
+                                                              ['p', [5, 1], [6, 1]],
+                                                              ['p', [5, 1], [6, 0]]
+                                                            ])
     end
   end
 
   in_check = %w[
-      k.......
-      ........
-      R.......
-      ........
-      ........
-      ........
-      ........
-      ........
-    ]
-  subject (:game_board_in_check) { described_class.new(in_check) }
+    k.......
+    ........
+    R.......
+    ........
+    ........
+    ........
+    ........
+    ........
+  ]
+  subject(:game_board_in_check) { described_class.new(in_check) }
 
   context 'when in check with white rook and black king' do
     describe '#find_king' do
@@ -190,9 +190,9 @@ describe GameBoard do
     describe '#avoid_moving_into_check' do
       it 'removes moves that are in check' do
         expect(game_board_in_check.legal_moves('B')).to eql([
-          ["k", [0, 0], [1, 1]],
-          ["k", [0, 0], [0, 1]]
-        ])
+                                                              ['k', [0, 0], [1, 1]],
+                                                              ['k', [0, 0], [0, 1]]
+                                                            ])
       end
     end
   end

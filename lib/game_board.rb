@@ -2,41 +2,16 @@
 
 require 'colorize'
 require_relative 'pieces'
+require_relative 'position_reader'
+require_relative 'board_displayer'
 
 # Holds the pieces and finds legal moves
 class GameBoard
   attr_accessor :board
 
-  def initialize(position = nil)
-    @board = position ? read_position(position) : Array.new(8) { Array.new(8) }
-  end
-
-  def read_position(pos)
-    new_position = []
-    (0..7).each do |row|
-      new_position.push(pos[row].split('').map { |char| char_to_piece(char) })
-    end
-    new_position
-  end
-
-  def char_to_piece(char)
-    color = char.ord < 97 ? 'W' : 'B'
-    case char
-    when '.'
-      nil
-    when 'N', 'n'
-      Knight.new(color)
-    when 'R', 'r'
-      Rook.new(color)
-    when 'B', 'b'
-      Bishop.new(color)
-    when 'Q', 'q'
-      Queen.new(color)
-    when 'K', 'k'
-      King.new(color)
-    when 'P', 'p'
-      Pawn.new(color)
-    end
+  def initialize(position_text = nil)
+    @board = position_text ? PositionReader.new.read_position(position_text) : Array.new(8) { Array.new(8) }
+    @board_displayer = BoardDisplayer.new
   end
 
   # A move has format [<piece>, <origin>, <destination>].
@@ -58,11 +33,11 @@ class GameBoard
         next unless @board[row_i][col_i].color == color
 
         piece = @board[row_i][col_i]
-        if piece.is_a?(Pawn)
-          legal_moves += (find_pawn_moves(piece, [row_i, col_i], testing_for_check))
-        else
-          legal_moves += (find_moves(piece, [row_i, col_i], testing_for_check))
-        end
+        legal_moves += if piece.is_a?(Pawn)
+                         find_pawn_moves(piece, [row_i, col_i], testing_for_check)
+                       else
+                         find_moves(piece, [row_i, col_i], testing_for_check)
+                       end
       end
     end
     legal_moves
@@ -115,14 +90,12 @@ class GameBoard
       # Store the occupant of the finish square
       finish_occupant = @board[finish_sq[0]][finish_sq[1]]
       # If it is empty, we can move there - store it and continue.
-      if finish_occupant.nil?
-        pawn_move = [pawn.to_s, start, finish_sq]
-        pawn_moves.push(pawn_move) unless testing_for_check && test_for_check?(pawn_move)
-        next
+      break unless finish_occupant.nil?
+
+      pawn_move = [pawn.to_s, start, finish_sq]
+      pawn_moves.push(pawn_move) unless testing_for_check && test_for_check?(pawn_move)
+      next
       # Otherwise, break.
-      else
-        break
-      end
     end
     # For each possible capture
     pawn.step_pairs_capture.each do |step|
@@ -169,48 +142,47 @@ class GameBoard
   def find_king(color)
     (0..7).each do |row_i|
       (0..7).each do |col_i|
-        if @board[row_i][col_i].is_a?(King) && @board[row_i][col_i].color == color
-          return [row_i, col_i]
-        end
+        return [row_i, col_i] if @board[row_i][col_i].is_a?(King) && @board[row_i][col_i].color == color
       end
     end
     nil
   end
 
   def display
-    board_copy = []
-    (0..7).each do |row_i|
-      new_row = @board[row_i].map { |elem| elem.nil? ? '.' : elem.to_s }
-      board_copy << new_row
-    end
+    @board_displayer.display(@board)
+    # board_copy = []
+    # (0..7).each do |row_i|
+    #   new_row = @board[row_i].map { |elem| elem.nil? ? '.' : elem.to_s }
+    #   board_copy << new_row
+    # end
 
-    piece_map = [
-      ['.', 'K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'],
-      ['  ', '♚ ', '♛ ', '♜ ', '♝ ', '♞ ', '♟︎ ', '♔ ', '♕ ', '♖ ', '♗ ', '♘ ', '♙ ']
-    ]
+    # piece_map = [
+    #   ['.', 'K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'],
+    #   ['  ', '♚ ', '♛ ', '♜ ', '♝ ', '♞ ', '♟︎ ', '♔ ', '♕ ', '♖ ', '♗ ', '♘ ', '♙ ']
+    # ]
 
-    (0..7).each do |row_i|
-      board_copy[row_i].map! { |char| piece_map[1][piece_map[0].index(char) ]}
-    end
+    # (0..7).each do |row_i|
+    #   board_copy[row_i].map! { |char| piece_map[1][piece_map[0].index(char) ] }
+    # end
 
-    str = ''
-    [0, 2, 4, 6].each do |row_pair|
-      # First row in pair
-      str += "#{8 - row_pair} "
-      [0, 2, 4, 6].each do |col_pair|
-        str += board_copy[row_pair][col_pair].on_grey
-        str += board_copy[row_pair][col_pair + 1].on_magenta
-      end
-      str += "\n"
-      # Second row in pair
-      str += "#{8 - row_pair - 1} "
-      [0, 2, 4, 6].each do |col_pair|
-        str += board_copy[row_pair + 1][col_pair].on_magenta
-        str += board_copy[row_pair + 1][col_pair + 1].on_grey
-      end
-      str += "\n"
-    end
-    str + "  a b c d e f g h\n"
+    # str = ''
+    # [0, 2, 4, 6].each do |row_pair|
+    #   # First row in pair
+    #   str += "#{8 - row_pair} "
+    #   [0, 2, 4, 6].each do |col_pair|
+    #     str += board_copy[row_pair][col_pair].on_grey
+    #     str += board_copy[row_pair][col_pair + 1].on_magenta
+    #   end
+    #   str += "\n"
+    #   # Second row in pair
+    #   str += "#{8 - row_pair - 1} "
+    #   [0, 2, 4, 6].each do |col_pair|
+    #     str += board_copy[row_pair + 1][col_pair].on_magenta
+    #     str += board_copy[row_pair + 1][col_pair + 1].on_grey
+    #   end
+    #   str += "\n"
+    # end
+    # str + "  a b c d e f g h\n"
   end
 end
 
