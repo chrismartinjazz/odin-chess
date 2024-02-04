@@ -196,4 +196,22 @@ describe GameBoard do
       end
     end
   end
+
+  castling_king_side = %w[
+    ....k..r
+    .....ppp
+    ........
+    ........
+    ........
+    ........
+    .....PPP
+    ....K..R
+  ]
+  subject(:game_board_castling_king_side) { described_class.new(castling_king_side) }
+  context 'when castling is possible king side' do
+    it 'identifies castling moves for black and white king' do
+      expect(game_board_castling_king_side.legal_moves).to include(['k', [0, 4], [0, 6]])
+      expect(game_board_castling_king_side.legal_moves).to include(['K', [7, 4], [7, 6]])
+    end
+  end
 end

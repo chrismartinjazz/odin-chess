@@ -71,15 +71,3 @@ class Chess
     @current_player = @current_player == @player1 ? @player2 : @player1
   end
 end
-
-# starting_board = %w[
-#   rnbqkbnr
-#   pppppppp
-#   ........
-#   ........
-#   ........
-#   ........
-#   PPPPPPPP
-#   RNBQKBNR
-# ]
-# Chess.new(starting_board).game_loop
