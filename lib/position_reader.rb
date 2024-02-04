@@ -13,7 +13,6 @@ class PositionReader
   end
 
   def char_to_piece(char)
-    color = char.ord < 97 ? 'W' : 'B'
     case char
     when '.'
       nil
