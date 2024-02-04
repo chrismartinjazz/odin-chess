@@ -143,11 +143,13 @@ describe GameBoard do
     end
 
     it 'finds the legal moves for the white pawns' do
-      expect(game_board_four_pawns.legal_moves('W')).to eql([
-        ['P', [4, 0], [3, 0]],
-        ['P', [6, 0], [5, 0]],
-        ['P', [6, 0], [5, 1]]
-      ])
+      expect(game_board_four_pawns.legal_moves('W')).to eql(
+        [
+          ['P', [4, 0], [3, 0]],
+          ['P', [6, 0], [5, 0]],
+          ['P', [6, 0], [5, 1]]
+        ]
+      )
     end
 
     it 'finds the legal moves for the black pawns' do
@@ -187,19 +189,11 @@ describe GameBoard do
 
     describe '#avoid_moving_into_check' do
       it 'removes moves that are in check' do
-        initial_legal_moves = [
-          ["k", [0, 0], [1, 1]],
-          ["k", [0, 0], [1, 0]],
-          ["k", [0, 0], [0, 1]]
-        ]
-        expect(game_board_in_check.avoid_moving_into_check()).to eql([
+        expect(game_board_in_check.legal_moves('B')).to eql([
           ["k", [0, 0], [1, 1]],
           ["k", [0, 0], [0, 1]]
         ])
       end
     end
-    it 'returns'
   end
-
-
 end
