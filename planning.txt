@@ -347,6 +347,47 @@ Actually this collapses to the removing legal_moves step above. We now need to d
 
 Thinking this through - being in check and moving into check collapse into the same thing. You cannot move in a way that allows your opponent to capture your king. So, I simply need to implement the in_check? and avoid_moving_into_check methods (I think).
 
+---
+
+Now adding castling.
+
+I already have castling as part of the move converter, so the player will be able to select it as the king moving to its castled square.
+I need to:
+- Add it to the legal move finder
+- Add it as a special case in move_piece
+- Add logic to disallow it once king or rook has moved
+
+It seems like it could be computationally expensive so I need to add an early check for castle disallowed.
+Castling is disallowed once the king or the relevant rook have moved.
+I can see doing this in two ways:
+- Add 4 true/false flags (colour, queen / king side) to GameBoard, and send message to toggle them off every time a king or rook is moved. Method just looks at the flags to know what to check for.
+- Add a 'moved' flag in king and rook and send message to toggle it on every time one is moved. Method checks if king has moved, then each rook, and returns the types of castling to check for.
+
+I will use a true/false flag in the game_board to determine whether or not to check for it, and see how this goes.
+GameBoard new instance variables:
+@white_may_castle_queen_side
+@white_may_castle_king_side
+@black_may_castle_queen_side
+@black_may_castle_king_side
+
+To add it to the legal move finder:
+- If white's move and @white_may_castle_queen / king side
+  - Check for castling
+    - Return false unless squares between king and rook nil
+    - Return false if in_check
+    - Move king one square - return false if in_check
+    - Move king second square - return false if in_check
+    - Move the king back to starting position (which is known, don't need to have stored it)
+    - Return true
+  - End
+
+To add it to move piece:
+- If it is a castling move (in the set of 4)
+  - (By definition, castling is permitted if the move is received, so don't need to check this is allowed)
+  - Switch based on the move - move both king and rook to correct squares.
+  - Return nil.
+
+
 
 Game of the century!
 Nf3
