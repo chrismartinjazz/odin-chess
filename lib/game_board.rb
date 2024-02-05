@@ -15,38 +15,53 @@ class GameBoard
   def initialize(position_text = nil)
     @board = position_text ? PositionReader.new.read_position(position_text) : Array.new(8) { Array.new(8) }
     @board_displayer = BoardDisplayer.new
-    @castling_permitted = {
-      white_king_side: true, white_queen_side: true,
-      black_king_side: true, black_queen_side: true
+    @can_castle = {
+      w_king_side: false, w_queen_side: false,
+      b_king_side: false, b_queen_side: false
+    }
+    return unless castling_initial_position?
+
+    @can_castle = {
+      w_king_side: true, w_queen_side: true,
+      b_king_side: true, b_queen_side: true
     }
   end
 
   # A move has format [<piece>, <origin>, <destination>].
   # Returns the initial occupant of the destination square (nil, or a Piece)
-  def move_piece(move)
-    update_castling_permitted(move[1])
+  def castling_initial_position?
+    @board[0, 0].is_a?(Rook) &&
+      @board[0, 4].is_a?(King) &&
+      @board[0, 7].is_a?(Rook) &&
+      @board[7, 0].is_a?(Rook) &&
+      @board[7, 4].is_a?(King) &&
+      @board[7, 7].is_a?(Rook)
+  end
+
+  def move_piece(move, testing_for_check = true)
+    update_can_castle(move[1]) unless testing_for_check
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
     destination_square_occupant
   end
 
-  def update_castling_permitted(start_sq)
+  def update_can_castle(start_sq)
     case start_sq
     when [0, 4]
-      @castling_permitted[:black_king_side] = false
-      @castling_permitted[:black_queen_side] = false
+      @can_castle[:b_king_side] = false
+      @can_castle[:b_queen_side] = false
     when [7, 4]
-      @castling_permitted[:white_king_side] = false
-      @castling_permitted[:white_queen_side] = false
+      @can_castle[:w_king_side] = false
+      @can_castle[:w_queen_side] = false
     when [0, 0]
-      @castling_permitted[:black_queen_side] = false
+      @can_castle[:b_queen_side] = false
     when [0, 7]
-      @castling_permitted[:black_king_side] = false
+      @can_castle[:b_king_side] = false
     when [7, 0]
-      @castling_permitted[:white_queen_side] = false
+      @can_castle[:w_queen_side] = false
     when [7, 7]
-      @castling_permitted[:white_king_side] = false
+      @can_castle[:w_king_side] = false
     end
   end
 

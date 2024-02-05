@@ -21,7 +21,7 @@ module LegalMoves
         legal_moves += find_moves_for_piece(piece, [row_i, col_i], testing_for_check)
       end
     end
-    # legal_moves += legal_castling_moves(color, @castle_prohibiting_moves)
+    legal_moves += legal_castling_moves(color) if testing_for_check
     legal_moves
   end
 
