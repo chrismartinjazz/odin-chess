@@ -12,6 +12,10 @@ class GameBoard
   def initialize(position_text = nil)
     @board = position_text ? PositionReader.new.read_position(position_text) : Array.new(8) { Array.new(8) }
     @board_displayer = BoardDisplayer.new
+    @white_may_castle_queen_side = true
+    @white_may_castle_king_side = true
+    @black_may_castle_queen_side = true
+    @black_may_castle_king_side = true
   end
 
   # A move has format [<piece>, <origin>, <destination>].
@@ -25,6 +29,7 @@ class GameBoard
 
   def legal_moves(color, testing_for_check = true)
     legal_moves = []
+    castling_moves(color)
 
     (0..7).each do |row_i|
       (0..7).each do |col_i|
@@ -42,6 +47,8 @@ class GameBoard
     end
     legal_moves
   end
+
+  def castling_moves(color); end
 
   def find_moves(piece, start, testing_for_check)
     moves = []
