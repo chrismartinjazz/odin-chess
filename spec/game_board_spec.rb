@@ -198,14 +198,14 @@ describe GameBoard do
   end
 
   castling_king_side = %w[
-    ....k..r
+    r...k..r
     .....ppp
     ........
     ........
     ........
     ........
     .....PPP
-    ....K..R
+    R...K..R
   ]
   subject(:game_board_castling_king_side) { described_class.new(castling_king_side) }
   context 'when castling is possible king side' do
