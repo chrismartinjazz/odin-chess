@@ -433,7 +433,7 @@ Move this to be one step earlier - just before find_check - and pass in the resu
 - Rather than repeatedly looking for king position - use the king's knowledge of its position.
 Done this.
 The variable "testing_for_check" isn't correctly named now.
-Should be "for_current_player: true / false"
+Should be "active_player: true / false"
 
 
 

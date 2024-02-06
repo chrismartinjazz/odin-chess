@@ -30,6 +30,7 @@ describe GameBoard do
   ]
 
   subject(:game_board_knight) { described_class.new(one_knight) }
+
   context 'When the board has just one white knight' do
     it 'initializes to a white knight in the corner with appropriate argument' do
       expect(game_board_knight.board[7][0]).to be_a Knight
@@ -47,6 +48,7 @@ describe GameBoard do
     end
 
     it 'returns the legal moves of the knight' do
+      game_board_knight.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
       expect(game_board_knight.legal_moves('W')).to eq([
                                                          ['N', [7, 0], [5, 1]],
                                                          ['N', [7, 0], [6, 2]]
@@ -83,6 +85,7 @@ describe GameBoard do
     end
 
     it 'returns the legal moves of the white knight' do
+      game_board_two_knights.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
       expect(game_board_two_knights.legal_moves('W')).to eq([
                                                               ['N', [7, 0], [5, 1]],
                                                               ['N', [7, 0], [6, 2]]
@@ -90,6 +93,7 @@ describe GameBoard do
     end
 
     it 'returns the legal moves of the black knight' do
+      game_board_two_knights.instance_variable_set(:@can_castle, { b_king_side: false, b_queen_side: false })
       expect(game_board_two_knights.legal_moves('B')).to eq([
                                                               ['n', [0, 0], [1, 2]],
                                                               ['n', [0, 0], [2, 1]]
@@ -143,6 +147,7 @@ describe GameBoard do
     end
 
     it 'finds the legal moves for the white pawns' do
+      game_board_four_pawns.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
       expect(game_board_four_pawns.legal_moves('W')).to eql(
         [
           ['P', [4, 0], [3, 0]],
@@ -153,6 +158,7 @@ describe GameBoard do
     end
 
     it 'finds the legal moves for the black pawns' do
+      game_board_four_pawns.instance_variable_set(:@can_castle, { b_king_side: false, b_queen_side: false })
       expect(game_board_four_pawns.legal_moves('B')).to eql([
                                                               ['p', [1, 0], [2, 0]],
                                                               ['p', [1, 0], [3, 0]],
