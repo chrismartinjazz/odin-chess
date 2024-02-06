@@ -8,8 +8,8 @@
 module LegalMoves
   # include LegalCastling
 
-  def legal_moves(color, testing_for_check = true)
-    @king_position = find_king(color) if testing_for_check
+  def legal_moves(color, active_player: true)
+    @king_position = find_king(color) if active_player
     legal_moves = []
 
     (0..7).each do |row_i|
@@ -19,19 +19,19 @@ module LegalMoves
         next unless @board[row_i][col_i].color == color
 
         piece = @board[row_i][col_i]
-        legal_moves += find_moves_for_piece(piece, [row_i, col_i], testing_for_check)
+        legal_moves += find_moves_for_piece(piece, [row_i, col_i], active_player)
       end
     end
-    # legal_moves += legal_castling_moves(color) if testing_for_check
+    # legal_moves += legal_castling_moves(color) if active_player
     legal_moves
   end
 
-  def find_moves_for_piece(piece, position, testing_for_check)
+  def find_moves_for_piece(piece, position, active_player)
     if piece.is_a?(Pawn)
       find_pawn_moves(piece, position,
-                      testing_for_check)
+                      active_player)
     else
-      find_moves(piece, position, testing_for_check)
+      find_moves(piece, position, active_player)
     end
   end
   # rubocop:disable Metrics/MethodLength
@@ -39,7 +39,7 @@ module LegalMoves
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
 
-  def find_moves(piece, start, testing_for_check)
+  def find_moves(piece, start, active_player)
     moves = []
     # For each direction the piece can move
     piece.step_pairs.each do |step|
@@ -54,11 +54,11 @@ module LegalMoves
         finish_occupant = @board[finish_sq[0]][finish_sq[1]]
         # If it is empty, we can move there - store it and continue.
         if finish_occupant.nil?
-          add_move(moves, piece, start, finish_sq, testing_for_check)
+          add_move(moves, piece, start, finish_sq, active_player)
           next
         end
         # If it is occupied by an opposing piece, we can capture it, add to legal moves
-        add_move(moves, piece, start, finish_sq, testing_for_check) if finish_occupant.color != piece.color
+        add_move(moves, piece, start, finish_sq, active_player) if finish_occupant.color != piece.color
         # If we have reached this line, we have either stored the capture move, or
         # we are looking at a piece of our own color - so go to the next move direction.
         break
@@ -67,7 +67,7 @@ module LegalMoves
     moves
   end
 
-  def find_pawn_moves(pawn, start, testing_for_check)
+  def find_pawn_moves(pawn, start, active_player)
     pawn_moves = []
     max_move = (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1) ? 2 : 1
     # For each possible movement (not capturing)
@@ -81,7 +81,7 @@ module LegalMoves
       # If it is empty, we can move there - store it and continue.
       break unless finish_occupant.nil?
 
-      add_move(pawn_moves, pawn, start, finish_sq, testing_for_check)
+      add_move(pawn_moves, pawn, start, finish_sq, active_player)
       next
       # Otherwise, break.
     end
@@ -97,13 +97,13 @@ module LegalMoves
       next if finish_occupant.nil? || finish_occupant.color == pawn.color
 
       # If it is occupied by an opposing piece, we can capture it, add to legal moves
-      add_move(pawn_moves, pawn, start, finish_sq, testing_for_check)
+      add_move(pawn_moves, pawn, start, finish_sq, active_player)
     end
     pawn_moves
   end
 
-  def add_move(moves, piece, start, finish_sq, testing_for_check)
+  def add_move(moves, piece, start, finish_sq, active_player)
     move = [piece.to_s, start, finish_sq]
-    moves.push(move) unless testing_for_check && test_for_check?(move)
+    moves.push(move) unless active_player && test_for_check?(move)
   end
 end

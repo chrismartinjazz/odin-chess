@@ -28,7 +28,7 @@ class GameBoard
   # TODO: Change this logic so that the GameBoard stores as an instance variable, all of the legal moves for white and
   # all of the legal moves for black, after each move. Also store the king positions to make calculating the legal moves
   # quicker.
-  def move_piece(move, testing_for_check = true)
+  def move_piece(move, testing_for_check: false)
     update_can_castle(move[1]) unless testing_for_check
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
@@ -58,11 +58,11 @@ class GameBoard
   def test_for_check?(move)
     player_color = move[0].ord < 97 ? 'W' : 'B'
     # Make the move and test for check
-    original_occupant = move_piece(move)
+    original_occupant = move_piece(move, testing_for_check: true)
     @king_position = find_king(player_color) if move[0].upcase == 'K'
     in_check = in_check?(player_color)
     # Undo the move - reverse it and restore original occupant
-    move_piece([move[0], move[2], move[1]])
+    move_piece([move[0], move[2], move[1]], testing_for_check: true)
     @king_position = find_king(player_color) if move[0].upcase == 'K'
     @board[move[2][0]][move[2][1]] = original_occupant
     # Return the true or false result
@@ -74,7 +74,7 @@ class GameBoard
     return false if @king_position.nil?
 
     opponent_color = color == 'W' ? 'B' : 'W'
-    opponent_legal_moves = legal_moves(opponent_color, false)
+    opponent_legal_moves = legal_moves(opponent_color, active_player: false)
     opponent_legal_moves.each do |move|
       return true if move[2] == @king_position
     end
