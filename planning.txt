@@ -387,6 +387,29 @@ To add it to move piece:
   - Switch based on the move - move both king and rook to correct squares.
   - Return nil.
 
+Refactoring the logic for legal move so that it is calculated at the end of each move rather than on demand from Game.
+Reason is to avoid having to calculate the king position and the opponent legal moves over and over again.
+Stepping through current flow:
+
+Chess -->
+legal_moves (loop through board stopping on each piece). testing_for_check == true
+  find_moves_for_piece                                          T
+  find_moves (or find_pawn_moves)                               T
+  (loop through each direction)                                 T
+    (loop through each square can travel)                       T
+      add_move                                                  T
+      test_for_check?
+      move_piece (make the move)
+      in_check?
+      find_king (loop through the board)
+      legal_moves(recursive - loop through board)               F
+        find_moves_for_piece                                    F
+        find_moves (or find_pawn_moves)                         F
+        (loop through each direction)                           F
+          (loop through each square can travel)                 F
+            add_move
+      if not in check --> add_move
+
 
 
 Game of the century!

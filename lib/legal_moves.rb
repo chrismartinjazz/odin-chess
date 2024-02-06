@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative 'legal_castling'
+# require_relative 'legal_castling'
 
 # Depends on GameBoard class, specifically the @board instance variable.
 
 # Finds legal moves in the position.
 module LegalMoves
-  include LegalCastling
+  # include LegalCastling
 
   def legal_moves(color, testing_for_check = true)
     legal_moves = []
@@ -21,7 +21,7 @@ module LegalMoves
         legal_moves += find_moves_for_piece(piece, [row_i, col_i], testing_for_check)
       end
     end
-    legal_moves += legal_castling_moves(color) if testing_for_check
+    # legal_moves += legal_castling_moves(color) if testing_for_check
     legal_moves
   end
 

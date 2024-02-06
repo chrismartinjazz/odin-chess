@@ -25,13 +25,15 @@ module LegalCastling
   end
 
   def path_clear?(king_row, direction)
+    return false if direction == -1 && !@board[king_row][1].nil?
+
     @board[king_row][4 + (direction * 1)].nil? && @board[king_row][4 + (direction * 2)].nil?
   end
 
   def path_safe?(color, king_char, king_row, direction)
     return false if in_check?(color) ||
-                    test_for_check?([king_char, [king_row, 4], [king_row, 4 + (direction * 1)]]).nil? ||
-                    test_for_check?([king_char, [king_row, 4], [king_row, 4 + (direction * 2)]]).nil?
+                    test_for_check?([king_char, [king_row, 4], [king_row, 4 + (direction * 1)]]) ||
+                    test_for_check?([king_char, [king_row, 4], [king_row, 4 + (direction * 2)]])
 
     true
   end

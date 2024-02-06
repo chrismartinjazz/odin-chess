@@ -16,28 +16,21 @@ class GameBoard
     @board = position_text ? PositionReader.new.read_position(position_text) : Array.new(8) { Array.new(8) }
     @board_displayer = BoardDisplayer.new
     @can_castle = {
-      w_king_side: false, w_queen_side: false,
-      b_king_side: false, b_queen_side: false
-    }
-    return unless castling_initial_position?
-
-    @can_castle = {
       w_king_side: true, w_queen_side: true,
       b_king_side: true, b_queen_side: true
     }
+    @white_legal_moves = []
+    @black_legal_moves = []
+    @white_king_position = []
+    @black_king_position = []
   end
 
   # A move has format [<piece>, <origin>, <destination>].
   # Returns the initial occupant of the destination square (nil, or a Piece)
-  def castling_initial_position?
-    @board[0, 0].is_a?(Rook) &&
-      @board[0, 4].is_a?(King) &&
-      @board[0, 7].is_a?(Rook) &&
-      @board[7, 0].is_a?(Rook) &&
-      @board[7, 4].is_a?(King) &&
-      @board[7, 7].is_a?(Rook)
-  end
 
+  # TODO: Change this logic so that the GameBoard stores as an instance variable, all of the legal moves for white and
+  # all of the legal moves for black, after each move. Also store the king positions to make calculating the legal moves
+  # quicker.
   def move_piece(move, testing_for_check = true)
     update_can_castle(move[1]) unless testing_for_check
     destination_square_occupant = @board[move[2][0]][move[2][1]]
