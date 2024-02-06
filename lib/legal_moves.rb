@@ -9,6 +9,7 @@ module LegalMoves
   # include LegalCastling
 
   def legal_moves(color, testing_for_check = true)
+    @king_position = find_king(color) if testing_for_check
     legal_moves = []
 
     (0..7).each do |row_i|

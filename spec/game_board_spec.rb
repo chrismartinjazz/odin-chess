@@ -183,6 +183,7 @@ describe GameBoard do
 
     describe '#in_check?' do
       it 'identifies that black is in check on their move' do
+        game_board_in_check.instance_variable_set(:@king_position, [0, 0])
         expect(game_board_in_check.in_check?('B')).to be true
       end
     end

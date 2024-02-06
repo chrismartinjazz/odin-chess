@@ -392,22 +392,59 @@ Reason is to avoid having to calculate the king position and the opponent legal 
 Stepping through current flow:
 
 Chess -->
-legal_moves (loop through board stopping on each piece). testing_for_check == true
-  find_moves_for_piece                                          T
-  find_moves (or find_pawn_moves)                               T
-  (loop through each direction)                                 T
-    (loop through each square can travel)                       T
-      add_move                                                  T
-      test_for_check?
-      move_piece (make the move)
-      in_check?
-      find_king (loop through the board)
-      legal_moves(recursive - loop through board)               F
-        find_moves_for_piece                                    F
-        find_moves (or find_pawn_moves)                         F
-        (loop through each direction)                           F
-          (loop through each square can travel)                 F
-            add_move
+Testing_for_check flag:
+T   legal_moves                                                         
+T   find_king (loop through the board) --> return king pos
+T   (loop each square to find pieces)
+T   (loop each piece of player color).
+T     find_moves_for_piece                                          
+T       find_moves (or find_pawn_moves)
+T       (loop through each direction)
+T         (loop through each square can travel)
+T           add_move
+T             test_for_check?
+T               move_piece (make the move) --> return original occupant
+T                 in_check?
+F                   legal_moves(loop each piece of opponent color)
+F                     find_moves_for_piece
+F                       find_moves (or find_pawn_moves)
+F                       (loop through each direction)
+F                         (loop through each square can travel)
+F                           add_move (pushes to opponent moves) --> returns nil
+F                         (end loop)
+F                       (end loop)
+F                       --> returns opponent moves
+F                     --> returns opponent moves
+F                   --> returns opponent moves
+T                 --> returns true or false (check)
+T               move_piece (undo the move) --> return nil
+T             --> return true or false (check)
+T           (add the move to moves if false i.e. not in check)
+T         (end loop)
+T       (end loop)
+T       --> returns moves
+T     --> returns moves
+T   test_for_castling --> return castling moves
+T   test_for_en_passant --> return en_passant moves
+T   --> return moves
+
+The only key optimisation I can see is moving the location of king_position.
+Move this to be one step earlier - just before find_check - and pass in the result.
+- Rather than repeatedly looking for king position - use the king's knowledge of its position.
+Done this.
+The variable "testing_for_check" isn't correctly named now.
+Should be "for_current_player: true / false"
+
+
+
+legal_moves(color, testing_for_check: false)
+  
+(loop through color's pieces)
+find_moves_for_piece
+
+            (if none of the opponent moves lead to check)
+            return to add_move
+
       if not in check --> add_move
 
 

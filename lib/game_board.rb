@@ -19,10 +19,7 @@ class GameBoard
       w_king_side: true, w_queen_side: true,
       b_king_side: true, b_queen_side: true
     }
-    @white_legal_moves = []
-    @black_legal_moves = []
-    @white_king_position = []
-    @black_king_position = []
+    @king_position = nil
   end
 
   # A move has format [<piece>, <origin>, <destination>].
@@ -62,22 +59,24 @@ class GameBoard
     player_color = move[0].ord < 97 ? 'W' : 'B'
     # Make the move and test for check
     original_occupant = move_piece(move)
+    @king_position = find_king(player_color) if move[0].upcase == 'K'
     in_check = in_check?(player_color)
     # Undo the move - reverse it and restore original occupant
     move_piece([move[0], move[2], move[1]])
+    @king_position = find_king(player_color) if move[0].upcase == 'K'
     @board[move[2][0]][move[2][1]] = original_occupant
     # Return the true or false result
     in_check
   end
 
   def in_check?(color)
-    king_position = find_king(color)
-    return false if king_position.nil?
+    # king_position = find_king(color)
+    return false if @king_position.nil?
 
     opponent_color = color == 'W' ? 'B' : 'W'
     opponent_legal_moves = legal_moves(opponent_color, false)
     opponent_legal_moves.each do |move|
-      return true if move[2] == king_position
+      return true if move[2] == @king_position
     end
     false
   end
