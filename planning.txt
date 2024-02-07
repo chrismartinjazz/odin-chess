@@ -466,7 +466,7 @@ find_moves_for_piece
 
 En passant
 ==========
-3 new functions are needed for move_pieces:
+3 new functions are needed for move_pieces, called in this order:
   - if a pawn has captured a nil square, remove the piece to its left/right depending on move direction.
   - clear en_passant_options
   - if pawn advances two squares, add an en passant destination square to @en_passant_options
@@ -475,7 +475,11 @@ En passant
   find_pawn_moves looks for en_passant_options when doing pawn captures.
 
 Implementation steps:
-- Add 
+- Add the instance variable
+- Add the advance two moves logic
+- Add the find legal moves logic
+- Add the capture logic
+
 
 
 Game of the century!

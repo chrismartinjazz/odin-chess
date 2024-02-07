@@ -92,11 +92,11 @@ module LegalMoves
       break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 
       # Store the occupant of the finish square.
-      # Go to next move direction unless it is an opposing piece.
+      # Go to next move direction unless it is an opposing piece or en_passant_option.
       finish_occupant = @board[finish_sq[0]][finish_sq[1]]
-      next if finish_occupant.nil? || finish_occupant.color == pawn.color
+      next if (finish_occupant.nil? || finish_occupant.color == pawn.color) && (finish_sq != @en_passant_option)
 
-      # If it is occupied by an opposing piece, we can capture it, add to legal moves
+      # If it is occupied by an opposing piece, or an en_passant_option we can capture it, add to legal moves
       add_move(pawn_moves, pawn, start, finish_sq, active_player)
     end
     pawn_moves

@@ -20,22 +20,26 @@ class GameBoard
       b_king_side: true, b_queen_side: true
     }
     @king_position = nil
+    @en_passant_option = nil
   end
 
   # A move has format [<piece>, <origin>, <destination>].
   # Returns the initial occupant of the destination square (nil, or a Piece)
-
-  # TODO: Change this logic so that the GameBoard stores as an instance variable, all of the legal moves for white and
-  # all of the legal moves for black, after each move. Also store the king positions to make calculating the legal moves
-  # quicker.
   def move_piece(move, testing_for_check: false)
-    update_can_castle(move[1]) unless testing_for_check
-    castle(move) if castling?(move) && !testing_for_check
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
-    promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
-    destination_square_occupant
+
+    if testing_for_check == false
+      castle(move) if castling?(move)
+      update_can_castle(move[1])
+      promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
+      en_passant_captured_pawn = en_passant_capture(move)
+      @en_passant_options = nil
+      pawn_two_square_advance(move)
+    end
+
+    en_passant_captured_pawn || destination_square_occupant
   end
 
   def update_can_castle(start_sq)
@@ -119,6 +123,24 @@ class GameBoard
       'N' => Knight.new(color)
     }
     @board[move[2][0]][move[2][1]] = map[promotion_piece]
+  end
+
+  def pawn_two_square_advance(move)
+    return unless move[0].upcase == 'P' && (move[1][0] - move[2][0]).abs == 2
+
+    @en_passant_option = [move[1][0] == 1 ? 2 : 6, move[1][1]]
+  end
+
+  def en_passant_capture(move)
+    return nil unless move[0].upcase == 'P' && (move[2] == @en_passant_option)
+
+    direction = move[2][1] - move[1][1]
+    row = move[1][0]
+    col = move[1][1] + direction
+
+    captured_pawn = @board[row][col]
+    @board[row][col] = nil
+    captured_pawn
   end
 
   def find_king(color)

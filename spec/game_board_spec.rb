@@ -343,4 +343,73 @@ describe GameBoard do
       end
     end
   end
+
+  en_passant = %w[
+    ........
+    p.......
+    ........
+    .P......
+    ........
+    ........
+    ........
+    ........
+  ]
+
+  subject(:board_en_passant) { described_class.new(en_passant) }
+
+  context 'When a pawn advances two squares' do
+    describe '#pawn_two_square_advance' do
+      it 'adds the appropriate square to en_passant_options' do
+        move = ['p', [1, 0], [3, 0]]
+        expect(board_en_passant.instance_variable_get(:@en_passant_option)).to be nil
+        board_en_passant.pawn_two_square_advance(move)
+        expect(board_en_passant.instance_variable_get(:@en_passant_option)).to eql([2, 0])
+      end
+    end
+
+    describe '#move_piece' do
+      it 'adds the appropriate square to en_passant_options' do
+        move = ['p', [1, 0], [3, 0]]
+        expect(board_en_passant.instance_variable_get(:@en_passant_option)).to be nil
+        board_en_passant.move_piece(move)
+        expect(board_en_passant.instance_variable_get(:@en_passant_option)).to eql([2, 0])
+      end
+    end
+
+    describe '#legal_moves' do
+      it 'identifies en_passant capture as a legal move' do
+        move = ['p', [1, 0], [3, 0]]
+        board_en_passant.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
+
+        board_en_passant.pawn_two_square_advance(move)
+        expect(board_en_passant.legal_moves('W')).to eql(
+          [
+            ['P', [3, 1], [2, 1]],
+            ['P', [3, 1], [2, 0]]
+          ]
+        )
+      end
+    end
+
+    describe '#en_passant_capture' do
+      it 'removes the pawn captured by en passant' do
+        black_move = ['p', [1, 0], [3, 0]]
+        board_en_passant.move_piece(black_move)
+
+        white_move = ['P', [3, 1], [2, 0]]
+        expect(board_en_passant.board[3][0]).to be_a Pawn
+        board_en_passant.en_passant_capture(white_move)
+        expect(board_en_passant.board[3][0]).to be nil
+      end
+
+      it 'returns the captured piece' do
+        black_move = ['p', [1, 0], [3, 0]]
+        board_en_passant.move_piece(black_move)
+
+        white_move = ['P', [3, 1], [2, 0]]
+        return_value = board_en_passant.en_passant_capture(white_move)
+        expect(return_value).to be_a Pawn
+      end
+    end
+  end
 end
