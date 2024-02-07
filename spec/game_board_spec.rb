@@ -47,18 +47,22 @@ describe GameBoard do
       end
     end
 
-    it 'returns the legal moves of the knight' do
-      game_board_knight.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
-      expect(game_board_knight.legal_moves('W')).to eq([
-                                                         ['N', [7, 0], [5, 1]],
-                                                         ['N', [7, 0], [6, 2]]
-                                                       ])
+    describe '#legal_moves' do
+      it 'returns the legal moves of the knight' do
+        game_board_knight.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
+        expect(game_board_knight.legal_moves('W')).to eq([
+                                                           ['N', [7, 0], [5, 1]],
+                                                           ['N', [7, 0], [6, 2]]
+                                                         ])
+      end
     end
 
-    it 'returns a string representing the board' do
-      board_display = game_board_knight.display
-      expect(board_display).to include('♞')
-      expect(board_display).not_to include('N')
+    describe '#display' do
+      it 'returns a string representing the board' do
+        board_display = game_board_knight.display
+        expect(board_display).to include('♞')
+        expect(board_display).not_to include('N')
+      end
     end
   end
 
@@ -204,7 +208,7 @@ describe GameBoard do
     end
   end
 
-  castling_king_side = %w[
+  castling = %w[
     r...k..r
     .....ppp
     ........
@@ -214,11 +218,72 @@ describe GameBoard do
     .....PPP
     R...K..R
   ]
-  subject(:game_board_castling_king_side) { described_class.new(castling_king_side) }
+  subject(:game_board_castling) { described_class.new(castling) }
+
   context 'when castling is possible king side' do
-    xit 'identifies castling moves for black and white king' do
-      expect(game_board_castling_king_side.legal_moves('B')).to include(['k', [0, 4], [0, 6]])
-      expect(game_board_castling_king_side.legal_moves('W')).to include(['K', [7, 4], [7, 6]])
+    it 'identifies castling moves for black and white king' do
+      expect(game_board_castling.legal_moves('B')).to include(['k', [0, 4], [0, 6]])
+      expect(game_board_castling.legal_moves('W')).to include(['K', [7, 4], [7, 6]])
+    end
+  end
+
+  describe '#castling?' do
+    it 'identifies if a move is a castling move for black' do
+      move = ['k', [0, 4], [0, 2]]
+      expect(game_board_castling.castling?(move)).to be true
+    end
+
+    it 'identifies if a move is a castling move for white' do
+      move = ['K', [0, 4], [0, 6]]
+      expect(game_board_castling.castling?(move)).to be true
+    end
+
+    it 'identifies a normal king move as not castling' do
+      move = ['k', [0, 3], [0, 2]]
+      expect(game_board_castling.castling?(move)).to be false
+    end
+  end
+
+  describe '#castle' do
+    it 'moves the rook for black' do
+      move = ['k', [0, 4], [0, 2]]
+      game_board_castling.castle(move)
+      expect(game_board_castling.board[0][3]).to be_a Rook
+    end
+
+    it 'moves the rook for white' do
+      move = ['K', [7, 4], [7, 6]]
+      game_board_castling.castle(move)
+      expect(game_board_castling.board[7][5]).to be_a Rook
+    end
+  end
+
+  starting_pos = %w[
+    rnbqkbnr
+    pppppppp
+    ........
+    ........
+    ........
+    ........
+    PPPPPPPP
+    RNBQKBNR
+  ]
+  subject(:game_board_starting_pos) { described_class.new(starting_pos) }
+  context 'When moving into castling position' do
+    describe '#move_piece' do
+      fit 'plays a legal sequence of moves including castling' do
+        game_board_starting_pos.move_piece(['P', [6, 4], [4, 4]])
+        game_board_starting_pos.move_piece(['p', [1, 4], [3, 4]])
+        game_board_starting_pos.move_piece(['N', [7, 6], [5, 5]])
+        game_board_starting_pos.move_piece(['n', [0, 6], [2, 5]])
+        game_board_starting_pos.move_piece(['B', [7, 5], [6, 4]])
+        game_board_starting_pos.move_piece(['b', [0, 5], [1, 4]])
+        expect(game_board_starting_pos.board[7][4]).to be_a King
+        expect(game_board_starting_pos.board[7][7]).to be_a Rook
+        game_board_starting_pos.move_piece(['K', [7, 4], [7, 6]])
+        expect(game_board_starting_pos.board[7][6]).to be_a King
+        expect(game_board_starting_pos.board[7][5]).to be_a Rook
+      end
     end
   end
 end

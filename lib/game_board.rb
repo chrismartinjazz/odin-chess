@@ -30,6 +30,7 @@ class GameBoard
   # quicker.
   def move_piece(move, testing_for_check: false)
     update_can_castle(move[1]) unless testing_for_check
+    castle(move) if castling?(move) && !testing_for_check
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
@@ -79,6 +80,18 @@ class GameBoard
       return true if move[2] == @king_position
     end
     false
+  end
+
+  def castling?(move)
+    move[0].upcase == 'K' && (move[1][1] - move[2][1]).abs == 2
+  end
+
+  def castle(move)
+    rook_letter = move[0] == 'K' ? 'R' : 'r'
+    rook_row = move[1][0]
+    rook_start_col = move[2][1] == 2 ? 0 : 7
+    rook_end_col = move[2][1] == 2 ? 3 : 5
+    move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
   end
 
   def find_king(color)

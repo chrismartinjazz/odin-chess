@@ -52,8 +52,8 @@ describe GameBoard do
       expect(subject.check_castling('B', 'k', 0, 1)).to eql(['k', [0, 4], [0, 6]])
     end
 
-    it 'returns an empty array for castling queen side' do
-      expect(subject.check_castling('B', 'k', 0, -1)).to eql([])
+    it 'returns nil for castling queen side' do
+      expect(subject.check_castling('B', 'k', 0, -1)).to eql(nil)
     end
   end
 
