@@ -271,7 +271,7 @@ describe GameBoard do
   subject(:game_board_starting_pos) { described_class.new(starting_pos) }
   context 'When moving into castling position' do
     describe '#move_piece' do
-      fit 'plays a legal sequence of moves including castling' do
+      it 'plays a legal sequence of moves including castling' do
         game_board_starting_pos.move_piece(['P', [6, 4], [4, 4]])
         game_board_starting_pos.move_piece(['p', [1, 4], [3, 4]])
         game_board_starting_pos.move_piece(['N', [7, 6], [5, 5]])
@@ -283,6 +283,63 @@ describe GameBoard do
         game_board_starting_pos.move_piece(['K', [7, 4], [7, 6]])
         expect(game_board_starting_pos.board[7][6]).to be_a King
         expect(game_board_starting_pos.board[7][5]).to be_a Rook
+      end
+    end
+  end
+
+  pawn_prom = %w[
+    ......k.
+    PK......
+    ...P....
+    ........
+    ........
+    ........
+    ........
+    ........
+  ]
+
+  subject(:board_pawn_prom) { described_class.new(pawn_prom) }
+
+  context 'When a pawn is promoting' do
+    describe '#pawn_promoting?' do
+      it 'identifies a pawn promotion move' do
+        move = ['P', [1, 0], [0, 0]]
+        expect(board_pawn_prom.pawn_promoting?(move)).to be true
+      end
+
+      it 'identifies a pawn move that is not a promotion' do
+        move = ['P', [2, 3], [1, 3]]
+        expect(board_pawn_prom.pawn_promoting?(move)).to be false
+      end
+    end
+
+    describe '#promote_pawn' do
+      before do
+        allow(board_pawn_prom).to receive(:ask_promotion_piece) { 'Q' }
+        $stdout = StringIO.new
+      end
+
+      it 'promotes a pawn to a queen' do
+        move = ['P', [1, 0], [0, 0]]
+
+        board_pawn_prom.move_piece(move)
+        expect(board_pawn_prom.board[0][0]).to be_a Queen
+        expect(board_pawn_prom.board[1][0]).to be nil
+      end
+    end
+
+    describe '#promote_pawn' do
+      before do
+        allow(board_pawn_prom).to receive(:ask_promotion_piece) { 'R' }
+        $stdout = StringIO.new
+      end
+
+      it 'promotes a pawn to a rook' do
+        move = ['P', [1, 0], [0, 0]]
+
+        board_pawn_prom.move_piece(move)
+        expect(board_pawn_prom.board[0][0]).to be_a Rook
+        expect(board_pawn_prom.board[1][0]).to be nil
       end
     end
   end

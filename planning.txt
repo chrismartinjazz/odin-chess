@@ -1,3 +1,11 @@
+BUGS TO FIX
+===========
+If enter incorrect letter for move first letter, crashes.
+
+
+===================
+
+
 Planning - Chess in command line.
 
 ---
@@ -227,11 +235,20 @@ Add Pawns. At this point can play a full game (with humans enforcing check rules
 * DONE
 
 Add 'in_check?'
-Add castling
-Add pawn promotion
-Add 'result?'
+* DONE
 
+Add castling
+* DONE
+
+Add pawn promotion
+* DONE
+
+Add en passant
+Add 'result?'
 Add save and load
+Tidy display and clear_display
+Introductory message
+DONE
 
 BOARD:
 White:  ♔♕♖♗♘♙
@@ -447,6 +464,18 @@ find_moves_for_piece
 
       if not in check --> add_move
 
+En passant
+==========
+3 new functions are needed for move_pieces:
+  - if a pawn has captured a nil square, remove the piece to its left/right depending on move direction.
+  - clear en_passant_options
+  - if pawn advances two squares, add an en passant destination square to @en_passant_options
+
+1 new function is needed for legal_moves:
+  find_pawn_moves looks for en_passant_options when doing pawn captures.
+
+Implementation steps:
+- Add 
 
 
 Game of the century!

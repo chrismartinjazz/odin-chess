@@ -34,6 +34,7 @@ class GameBoard
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
+    promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
     destination_square_occupant
   end
 
@@ -92,6 +93,32 @@ class GameBoard
     rook_start_col = move[2][1] == 2 ? 0 : 7
     rook_end_col = move[2][1] == 2 ? 3 : 5
     move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
+  end
+
+  def pawn_promoting?(move)
+    move[0].upcase == 'P' && ((move[2][0]).zero? || move[2][0] == 7)
+  end
+
+  def ask_promotion_piece
+    puts 'Promote to Q - Queen : R - Rook : B - Bishop : N - Knight'
+    options = %w[Q R B N]
+    input = ''
+    until options.include?(input)
+      print '>> '
+      input = gets.chomp.strip.upcase.slice(0)
+    end
+    input
+  end
+
+  def promote_pawn(move, promotion_piece)
+    color = move[0] == 'P' ? 'W' : 'B'
+    map = {
+      'Q' => Queen.new(color),
+      'R' => Rook.new(color),
+      'B' => Bishop.new(color),
+      'N' => Knight.new(color)
+    }
+    @board[move[2][0]][move[2][1]] = map[promotion_piece]
   end
 
   def find_king(color)
