@@ -245,7 +245,9 @@ Add pawn promotion
 Add en passant
 * DONE
 
-Add 'result?'
+Add 'result' - checkmate, stalemate, resigns, exit
+* DONE
+
 Add save and load
 Tidy display and clear_display
 Introductory message

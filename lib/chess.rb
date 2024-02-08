@@ -30,9 +30,9 @@ class Chess
       return result if legal_moves.empty?
 
       move = ask_player_move(legal_moves)
-      return "#{@active_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'RESIGNS'
+      return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
 
-      return 'Exiting...' if move == 'EXIT'
+      return 'Exiting...' if move == 'exit'
 
       @game_board.move_piece(move)
       next_player
@@ -40,9 +40,11 @@ class Chess
   end
 
   def result
-    return "#{@active_player.color == 'W' ? 'White' : 'Black'} is checkmated.}" if in_check?(@active_player.color)
-
-    return 'Draw by stalemate.'
+    if @game_board.in_check?(@current_player.color)
+      "#{@current_player.color == 'W' ? 'White' : 'Black'} is checkmated."
+    else
+      'Draw by stalemate.'
+    end
   end
 
   def update_display(legal_moves)
@@ -56,6 +58,8 @@ class Chess
     accepted_move = false
     until accepted_move
       move = @current_player.ask_move
+      return move if %w[resigns exit].include?(move)
+
       valid_move = @move_converter.convert(move, @current_player.color)
       accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
     end
