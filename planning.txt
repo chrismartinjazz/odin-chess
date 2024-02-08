@@ -501,7 +501,9 @@ Save game logic.
 
 Steps:
 - Add the items we want to save - (1) list of moves and (2) board position
+DONE
 - Add the save logic
+DONE
 - Add the load logic
 
 

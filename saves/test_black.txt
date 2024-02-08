@@ -1,0 +1,1 @@
+{"current_player_color":"B","move_list":[["K",[7,4],[7,6]]],"position":["r.bqkb.r","p.p..ppp",".pp..n..","....p...",".P..P...",".....N..","P.PP.PPP","RNBQ.RK."]}

@@ -13,8 +13,8 @@ class GameBoard
   attr_accessor :board
 
   def initialize(position_text = nil)
-    position_read_write = PositionReadWrite.new
-    @board = position_text ? position_read_write.read_position(position_text) : Array.new(8) { Array.new(8) }
+    @position_read_write = PositionReadWrite.new
+    @board = position_text ? @position_read_write.read_position(position_text) : Array.new(8) { Array.new(8) }
     @board_displayer = BoardDisplayer.new
     @can_castle = {
       w_king_side: true, w_queen_side: true,
@@ -155,5 +155,9 @@ class GameBoard
 
   def display
     @board_displayer.display(@board)
+  end
+
+  def write_position
+    @position_read_write.write_position(@board)
   end
 end
