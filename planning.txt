@@ -1,8 +1,12 @@
-BUGS TO FIX
-===========
-
-
-===================
+FEATURES TO ADD
+===============
+Computer opposition (random move)
+MoveConverter converts in both directions: and outputs list of all moves at end of game.
+Title screen in main.rb
+--- Don't have time ---
+Use commands to go back and forward through game
+More advanced computer opposition
+===============
 
 
 Planning - Chess in command line.
@@ -249,9 +253,37 @@ Add 'result' - checkmate, stalemate, resigns, exit
 * DONE
 
 Add save and load
+* DONE
+
 Tidy display and clear_display
+
+Computer opponent (random legal move only)
+
 Introductory message
-DONE
+
+
+  ___ _    ___      _              
+ / __| |  |_ _|  __| |_  ___ ______
+| (__| |__ | |  / _| ' \/ -_|_-<_-<
+ \___|____|___| \__|_||_\___/__/__/
+                                    
+   options (type in lower case)
+   save : load : resigns : exit
+
+>> WHITE <<
+   BLACK
+
+8 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 
+7 ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙ 
+6                 
+5                 
+4                 
+3                 
+2 ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ 
+1 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜ 
+  a b c d e f g h
+
+>> e4
 
 BOARD:
 White:  ♔♕♖♗♘♙
@@ -505,6 +537,7 @@ DONE
 - Add the save logic
 DONE
 - Add the load logic
+DONE
 
 
 Possible other things to implement:

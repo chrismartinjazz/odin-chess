@@ -31,7 +31,7 @@ class Chess
   def game_loop
     loop do
       legal_moves = @game_board.legal_moves(@current_player.color)
-      update_display(legal_moves)
+      puts update_display
       return result if legal_moves.empty?
 
       move = ask_player_move(legal_moves)
@@ -61,13 +61,40 @@ class Chess
     end
   end
 
-  def update_display(legal_moves)
-    puts
-    puts @current_player.color
-    puts @game_board.display
-    p legal_moves
-    puts
-    p @move_list
+  def update_display
+    clear_screen
+    display = display_title
+    display += display_current_player
+    display += @game_board.display
+    display + "\n"
+  end
+
+  def clear_screen(testing: false)
+    return if testing == true
+
+    Gem.win_platform? ? (system 'cls') : (system 'clear')
+  end
+
+  def display_title
+    <<~HEREDOC
+        ___ _    ___      _
+       / __| |  |_ _|  __| |_  ___ ______
+      | (__| |__ | |  / _| ' \\/ -_|_-<_-<
+       \\___|____|___| \\__|_||_\\___/__/__/
+
+        use algebraic notation to move
+
+         options (type in lower case)
+         save : load : resigns : exit
+
+    HEREDOC
+  end
+
+  def display_current_player
+    display = ''
+    display += @current_player.color == 'W' ? ">> White <<\n" : "   White\n"
+    display += @current_player.color == 'B' ? ">> Black <<\n" : "   Black\n"
+    display + "\n"
   end
 
   def ask_player_move(legal_moves)
@@ -129,7 +156,10 @@ class Chess
 
   def load_game
     game_data = @file_manager.load_file
-    p game_data
+    set_game_state(game_data)
+  end
+
+  def set_game_state(game_data)
     @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
     @move_list = game_data[:move_list]
     @game_board = GameBoard.new(game_data[:position])
