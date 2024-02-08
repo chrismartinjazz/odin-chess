@@ -6,6 +6,8 @@ require_relative 'move_converter'
 
 # The main game loop
 class Chess
+  attr_reader :move_list
+
   def initialize(position = %w[
     rnbqkbnr
     pppppppp
@@ -44,8 +46,10 @@ class Chess
 
   def result
     if @game_board.in_check?(@current_player.color)
+      @move_list << '#'
       "#{@current_player.color == 'W' ? 'White' : 'Black'} is checkmated."
     else
+      @move_list << 'stalemate'
       'Draw by stalemate.'
     end
   end

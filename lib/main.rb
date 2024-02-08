@@ -2,6 +2,8 @@
 
 require_relative 'chess'
 
-result = Chess.new.game_loop
+game = Chess.new
+result = game.game_loop
 puts '======================='
 puts result
+p game.move_list
