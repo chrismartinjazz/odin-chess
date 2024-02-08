@@ -21,6 +21,7 @@ class Chess
     @player2 = Player.new('B')
     @move_converter = MoveConverter.new
     @current_player = @player1
+    @move_list = []
   end
 
   def game_loop
@@ -30,9 +31,11 @@ class Chess
       return result if legal_moves.empty?
 
       move = ask_player_move(legal_moves)
-      return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
-
       return 'Exiting...' if move == 'exit'
+
+      @move_list << move
+
+      return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
 
       @game_board.move_piece(move)
       next_player
@@ -52,6 +55,8 @@ class Chess
     puts @current_player.color
     puts @game_board.display
     p legal_moves
+    puts
+    p @move_list
   end
 
   def ask_player_move(legal_moves)
