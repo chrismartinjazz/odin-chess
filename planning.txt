@@ -482,12 +482,28 @@ Implementation steps:
 - Add the advance two moves logic
 - Add the find legal moves logic
 - Add the capture logic
+DONE
 
 Win / exit conditions
 result(@current_player) if legal_moves.empty? && game_board.in_check?
 result('stalemate') if legal_moves.empty? && !game_board.in_check?
 Resign (write 'resigns')
 exit (write 'exit')
+DONE
+
+Save game logic.
+- Want to be able to save at any time using move input.
+- Just save - exiting is handled at same prompt so not needed.
+- So... add as method in main game_loop.
+- I want it to be a flexible module... take more or less any number of arguments and json them into a save file.
+- So a hash with all the moves in move format e.g. e4 is ['P', [4, 6], [4, 4]]. This is useful for other things anyway. Store this in the chess object.
+- Add ability to dereference the board back to %w[rnbqkbnr...] etc etc. probably a new class board_writer.
+
+Steps:
+- Add the items we want to save - (1) list of moves and (2) board position
+- Add the save logic
+- Add the load logic
+
 
 Possible other things to implement:
 	Losing on Time
