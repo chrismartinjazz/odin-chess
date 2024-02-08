@@ -23,9 +23,9 @@ class MoveConverter
   def check_castling(move, color)
     king_row = color == 'B' ? 0 : 7
     king_letter = color == 'B' ? 'k' : 'K'
-    return [king_letter, [king_row, 4], [king_row, 6]] if move == 'O-O' || move == '0-0'
+    return [king_letter, [king_row, 4], [king_row, 6]] if %w[O-O 0-0].include?(move)
 
-    return [king_letter, [king_row, 4], [king_row, 2]] if move == 'O-O-O' || move == '0-0-0'
+    return [king_letter, [king_row, 4], [king_row, 2]] if ['O-O-O', '0-0-0'].include?(move)
 
     false
   end
@@ -40,7 +40,7 @@ class MoveConverter
   def strip_chars(move)
     algebraic = /[a-h1-8KQRBNP]/
     alg_move = ''
-    move.each_char { |char| alg_move += char if char.match?(algebraic)}
+    move.each_char { |char| alg_move += char if char.match?(algebraic) }
     alg_move
   end
 
@@ -56,9 +56,11 @@ class MoveConverter
     origin = alg_move[1..-3]
     case origin.length
     when 1
-      /[1-8]/.match?(origin) ?
-        orig_row = alg_map[1][alg_map[0].index(origin.slice(0))] :
+      if /[1-8]/.match?(origin)
+        orig_row = alg_map[1][alg_map[0].index(origin.slice(0))]
+      else
         orig_col = alg_map[1][alg_map[0].index(origin.slice(0))]
+      end
     when 2
       orig_row = alg_map[1][alg_map[0].index(origin.slice(1))]
       orig_col = alg_map[1][alg_map[0].index(origin.slice(0))]

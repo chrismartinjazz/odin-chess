@@ -35,8 +35,8 @@ class Chess
     accepted_move = false
     until accepted_move
       move = @current_player.ask_move
-      converted_move = @move_converter.convert(move, @current_player.color)
-      accepted_move = in_legal_moves(converted_move, legal_moves)
+      valid_move = @move_converter.convert(move, @current_player.color)
+      accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
     end
     accepted_move
   end
