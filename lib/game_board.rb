@@ -2,7 +2,7 @@
 
 require 'colorize'
 require_relative 'pieces'
-require_relative 'position_reader'
+require_relative 'position_read_write'
 require_relative 'board_displayer'
 require_relative 'legal_moves'
 
@@ -13,7 +13,8 @@ class GameBoard
   attr_accessor :board
 
   def initialize(position_text = nil)
-    @board = position_text ? PositionReader.new.read_position(position_text) : Array.new(8) { Array.new(8) }
+    position_read_write = PositionReadWrite.new
+    @board = position_text ? position_read_write.read_position(position_text) : Array.new(8) { Array.new(8) }
     @board_displayer = BoardDisplayer.new
     @can_castle = {
       w_king_side: true, w_queen_side: true,
