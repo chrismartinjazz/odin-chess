@@ -1,6 +1,5 @@
 BUGS TO FIX
 ===========
-If enter incorrect letter for move first letter, crashes.
 
 
 ===================
@@ -244,6 +243,8 @@ Add pawn promotion
 * DONE
 
 Add en passant
+* DONE
+
 Add 'result?'
 Add save and load
 Tidy display and clear_display
@@ -467,7 +468,7 @@ find_moves_for_piece
 En passant
 ==========
 3 new functions are needed for move_pieces, called in this order:
-  - if a pawn has captured en passant, remove the piece to its left/right depending on move direction.
+  - if a pawn has captured a nil square, remove the piece to its left/right depending on move direction.
   - clear en_passant_options
   - if pawn advances two squares, add an en passant destination square to @en_passant_options
 
@@ -475,17 +476,27 @@ En passant
   find_pawn_moves looks for en_passant_options when doing pawn captures.
 
 Implementation steps:
-- Add the instance variable DONE
-- Add the advance two moves logic DONE
-- Add the find legal moves logic DONE
-  - Next if
-    - Square not occupied by opposing piece
-    and
-    - Square not an en passant option
-    or
+- Add the instance variable
+- Add the advance two moves logic
+- Add the find legal moves logic
 - Add the capture logic
 
+Win / exit conditions
+result(@current_player) if legal_moves.empty? && game_board.in_check?
+result('stalemate') if legal_moves.empty? && !game_board.in_check?
+Resign (write 'resigns')
+exit (write 'exit')
 
+Possible other things to implement:
+	Losing on Time
+	Draw due to insufficient material	
+		Both players have no more than:
+			King
+			king + bishop
+			King + knight
+	
+    
+- game_board.in_check?
 
 Game of the century!
 Nf3
@@ -570,4 +581,3 @@ Kb1
 Nc3
 Kc1
 Rc2
-

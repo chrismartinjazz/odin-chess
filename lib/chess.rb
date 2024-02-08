@@ -6,7 +6,16 @@ require_relative 'move_converter'
 
 # The main game loop
 class Chess
-  def initialize(position = nil)
+  def initialize(position = %w[
+    rnbqkbnr
+    pppppppp
+    ........
+    ........
+    ........
+    ........
+    PPPPPPPP
+    RNBQKBNR
+  ])
     @game_board = GameBoard.new(position)
     @player1 = Player.new('W')
     @player2 = Player.new('B')
@@ -18,10 +27,22 @@ class Chess
     loop do
       legal_moves = @game_board.legal_moves(@current_player.color)
       update_display(legal_moves)
+      return result if legal_moves.empty?
+
       move = ask_player_move(legal_moves)
+      return "#{@active_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'RESIGNS'
+
+      return 'Exiting...' if move == 'EXIT'
+
       @game_board.move_piece(move)
       next_player
     end
+  end
+
+  def result
+    return "#{@active_player.color == 'W' ? 'White' : 'Black'} is checkmated.}" if in_check?(@active_player.color)
+
+    return 'Draw by stalemate.'
   end
 
   def update_display(legal_moves)
