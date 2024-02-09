@@ -3,7 +3,7 @@
 require_relative '../lib/chess'
 
 describe Chess do
-  subject(:chess) { described_class.new }
+  subject(:chess) { described_class.new(nil, PlayerHuman.new('W'), PlayerHuman.new('B')) }
 
   describe '#in_legal_moves' do
     context 'in the simple case of a knight on a1' do

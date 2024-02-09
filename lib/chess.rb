@@ -9,7 +9,7 @@ require_relative 'file_manager'
 class Chess
   attr_reader :move_list
 
-  def initialize(position = nil)
+  def initialize(position = nil, player1 = nil, player2 = nil)
     @initial_position = position || %w[
       rnbqkbnr
       pppppppp
@@ -20,13 +20,28 @@ class Chess
       PPPPPPPP
       RNBQKBNR
     ]
+    @player1 = player1 || ask_player_type('White')
+    @player2 = player2 || ask_player_type('Black')
     @game_board = GameBoard.new(@initial_position)
-    @player1 = Player.new('W')
-    @player2 = Player.new('B')
     @move_converter = MoveConverter.new
     @current_player = @player1
     @move_list = []
     @file_manager = FileManager.new
+  end
+
+  def ask_player_type(color)
+    puts "#{color} player is (h)uman or (c)omputer:"
+    valid_input = nil
+    until valid_input
+      print '>>'
+      input = gets.chomp.strip.downcase.slice(0)
+      valid_input = input if %w[h c].include?(input)
+    end
+    if valid_input == 'c'
+      PlayerComputer.new(color.slice(0))
+    else
+      PlayerHuman.new(color.slice(0))
+    end
   end
 
   def game_loop
@@ -45,6 +60,7 @@ class Chess
 
   def make_move(move, legal_moves)
     capture = @game_board.move_piece(move)
+    # TODO: move ask_promotion_piece here so computer can promote.
     @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
                                                     in_check: @game_board.in_check?(@current_player.color))
     next_player
@@ -143,12 +159,13 @@ class Chess
   def ask_player_move(legal_moves)
     accepted_move = false
     until accepted_move
-      move = @current_player.ask_move
+      move = @current_player.ask_move(legal_moves)
       return move if %w[save load new resign draw exit].include?(move)
 
       valid_move = @move_converter.convert(move, @current_player.color)
       accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
     end
+    sleep(0.5) if @current_player.is_a?(PlayerComputer)
     accepted_move
   end
 

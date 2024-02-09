@@ -95,7 +95,7 @@ class MoveConverter
     end
   end
 
-  def array_to_alg_move(move, capture, legal_moves = nil, in_check: false)
+  def array_to_alg_move(move, capture = nil, legal_moves = nil, in_check: false)
     return array_check_castling(move) if array_check_castling(move)
 
     return move if %w[# stalemate resigns].include?(move)
