@@ -32,14 +32,16 @@ class Chess
     loop do
       legal_moves = @game_board.legal_moves(@current_player.color)
       puts update_display
-      return result if legal_moves.empty?
-
-      move = ask_player_move(legal_moves)
+      move = ask_player_move(legal_moves) unless legal_moves.empty?
       save_game(game_state) if move == 'save'
       load_game if move == 'load'
       return 'Exiting...' if move == 'exit'
 
-      make_move(move, legal_moves) unless %w[save load].include?(move)
+      if legal_moves.empty? || %w[draw resign].include?(move)
+        game_over(move, legal_moves)
+      else
+        make_move(move, legal_moves) unless %w[save load].include?(move)
+      end
     end
   end
 
@@ -53,13 +55,16 @@ class Chess
     next_player
   end
 
-  def result
-    if @game_board.in_check?(@current_player.color)
-      @move_list << '#'
-      "#{@current_player.color == 'W' ? 'White' : 'Black'} is checkmated."
-    else
-      @move_list << 'stalemate'
-      'Draw by stalemate.'
+  def game_over(move, legal_moves)
+    player_in_check = @game_board.in_check?(@current_player.color)
+    if legal_moves.empty? && player_in_check
+      @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
+    elsif legal_moves.empty? && !player_in_check
+      @move_list.push('stalemate', '½–½')
+    elsif move == 'draw'
+      @move_list.push('(=)', '½–½')
+    elsif move == 'resign'
+      @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
     end
   end
 
@@ -87,7 +92,7 @@ class Chess
         use algebraic notation to move
 
          options (type in lower case)
-         save : load : resigns : exit
+      save : load : resign : draw : exit
 
     HEREDOC
   end
@@ -103,7 +108,7 @@ class Chess
     accepted_move = false
     until accepted_move
       move = @current_player.ask_move
-      return move if %w[resigns exit save load].include?(move)
+      return move if %w[resign draw exit save load].include?(move)
 
       valid_move = @move_converter.convert(move, @current_player.color)
       accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
