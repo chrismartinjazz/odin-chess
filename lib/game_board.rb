@@ -34,13 +34,13 @@ class GameBoard
     if testing_for_check == false
       castle(move) if castling?(move)
       update_can_castle(move[1])
-      promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
+      promotion_piece = promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
       en_passant_captured_pawn = en_passant_capture(move)
       @en_passant_options = nil
       pawn_two_square_advance(move)
     end
 
-    en_passant_captured_pawn || destination_square_occupant
+    en_passant_captured_pawn || promotion_piece || destination_square_occupant
   end
 
   def update_can_castle(start_sq)

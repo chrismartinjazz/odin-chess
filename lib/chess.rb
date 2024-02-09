@@ -45,6 +45,7 @@ class Chess
 
   def make_move(move)
     @move_list << move
+    # TODO: Fix resigns logic so it will run.
     return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
 
     @game_board.move_piece(move)

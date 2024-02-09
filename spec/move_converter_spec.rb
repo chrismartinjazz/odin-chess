@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../lib/move_converter'
+require_relative '../lib/pieces'
 
 describe MoveConverter do
   subject(:move_converter) { described_class.new }
@@ -57,8 +58,67 @@ describe MoveConverter do
   end
 
   describe '#array_to_alg_move' do
-    fit 'converts the move Nb6 back to algebraic notation' do
+    it 'converts basic moves and captures back to algebraic notation' do
+      queen = Queen.new('B')
       expect(move_converter.array_to_alg_move(['N', [0, 0], [2, 1]], nil)).to eql('Nb6')
+      expect(move_converter.array_to_alg_move(['p', [1, 0], [3, 0]], nil)).to eql('a5')
+      expect(move_converter.array_to_alg_move(['N', [0, 0], [2, 1]], queen)).to eql('Nxb6')
+    end
+
+    it 'returns castling 0-0 or 0-0-0 for castling moves' do
+      expect(move_converter.array_to_alg_move(['K', [7, 4], [7, 6]], nil)).to eql('0-0')
+      expect(move_converter.array_to_alg_move(['K', [7, 4], [7, 2]], nil)).to eql('0-0-0')
+      expect(move_converter.array_to_alg_move(['k', [0, 4], [0, 6]], nil)).to eql('0-0')
+      expect(move_converter.array_to_alg_move(['k', [0, 4], [0, 2]], nil)).to eql('0-0-0')
+    end
+
+    it 'handles pawn captures correctly' do
+      pawn = Pawn.new('W')
+      expect(move_converter.array_to_alg_move(['p', [1, 0], [2, 1]], pawn)).to eql('axb6')
+      expect(move_converter.array_to_alg_move(['P', [4, 4], [3, 3]], pawn)).to eql('exd5')
+    end
+
+    it 'handles pawn promotion with or without capturing' do
+      queen = Queen.new('W')
+      rook = Rook.new('R')
+      expect(move_converter.array_to_alg_move(['P', [1, 0], [0, 0]], queen)).to eql('a8Q')
+      expect(move_converter.array_to_alg_move(['P', [1, 1], [0, 0]], rook)).to eql('bxa8R')
+    end
+
+    it 'indicates check appropriately' do
+      queen = Queen.new('W')
+      expect(move_converter.array_to_alg_move(['P', [1, 0], [0, 0]], queen, in_check: true)).to eql('a8Q+')
+    end
+
+    it 'disambiguates when two of the same piece type can move to same square' do
+      expect(move_converter.array_to_alg_move(
+               ['N', [0, 0], [2, 1]],
+               nil,
+               [
+                 ['N', [0, 0], [2, 1]],
+                 ['N', [0, 2], [2, 1]]
+               ]
+             ))
+        .to eql('Nab6')
+      expect(move_converter.array_to_alg_move(
+               ['R', [0, 0], [4, 0]],
+               nil,
+               [
+                 ['R', [0, 0], [4, 0]],
+                 ['R', [7, 0], [4, 0]]
+               ]
+             ))
+        .to eql('R8a4')
+      expect(move_converter.array_to_alg_move(
+               ['Q', [0, 0], [2, 2]],
+               nil,
+               [
+                 ['Q', [2, 0], [2, 2]],
+                 ['Q', [0, 0], [2, 2]],
+                 ['Q', [0, 2], [2, 2]]
+               ]
+             ))
+        .to eql('Qa8c6')
     end
   end
 end
