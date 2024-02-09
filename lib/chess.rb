@@ -39,16 +39,17 @@ class Chess
       load_game if move == 'load'
       return 'Exiting...' if move == 'exit'
 
-      make_move(move) unless %w[save load].include?(move)
+      make_move(move, legal_moves) unless %w[save load].include?(move)
     end
   end
 
-  def make_move(move)
-    @move_list << move
-    # TODO: Fix resigns logic so it will run.
+  def make_move(move, legal_moves)
+    # TODO: Fix resigns logic so it will run. It all needs to be moved to end of move cycle.
     return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
 
-    @game_board.move_piece(move)
+    capture = @game_board.move_piece(move)
+    @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
+                                                    in_check: @game_board.in_check?(@current_player.color))
     next_player
   end
 

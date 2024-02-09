@@ -1,1 +1,1 @@
-{"current_player_color":"W","move_list":[["P",[6,4],[4,4]],["p",[1,4],[3,4]],["N",[7,6],[5,5]],["n",[0,1],[2,2]]],"position":["r.bqkbnr","pppp.ppp","..n.....","....p...","....P...",".....N..","PPPP.PPP","RNBQKB.R"]}
+{"current_player_color":"W","move_list":["e4","e5"],"position":["rnbqkbnr","pppp.ppp","........","....p...","....P...","........","PPPP.PPP","RNBQKBNR"]}
