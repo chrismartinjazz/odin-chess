@@ -256,6 +256,9 @@ Add save and load
 * DONE
 
 Tidy display and clear_display
+* DONE
+
+Reverse parser - move -> algebraic
 
 Computer opponent (random legal move only)
 

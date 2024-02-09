@@ -3,7 +3,7 @@
 require_relative '../lib/move_converter'
 
 describe MoveConverter do
-  subject(:move_converter) {described_class.new}
+  subject(:move_converter) { described_class.new }
 
   describe '#convert'
   it 'converts a castling move by either color' do
@@ -49,11 +49,16 @@ describe MoveConverter do
     expect(move_converter.convert('Nb0', 'W')).to be nil
     expect(move_converter.convert('Ni5', 'W')).to be nil
     expect(move_converter.convert('cd3x', 'W')).to be nil
-
   end
 
   it 'allows other characters and patterns commonly used in move_converter notation' do
     expect(move_converter.convert('Qa1c3+ ?!', 'W')).to eq(['Q', [7, 0], [5, 2]])
     expect(move_converter.convert('Qa1xc3!?#', 'W')).to eq(['Q', [7, 0], [5, 2]])
+  end
+
+  describe '#array_to_alg_move' do
+    fit 'converts the move Nb6 back to algebraic notation' do
+      expect(move_converter.array_to_alg_move(['N', [0, 0], [2, 1]], nil)).to eql('Nb6')
+    end
   end
 end

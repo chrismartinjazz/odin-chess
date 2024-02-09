@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 class MoveConverter
+  def initialize
+    @validation_length_3 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}$/
+    @validation_length_4 = /^[KQRNBP]{1}[a-h1-8]{1}[a-h]{1}[1-8]{1}$/
+    @validation_length_5 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}[a-h]{1}[1-8]{1}$/
+    @alg_map = [
+      [nil, '8', '7', '6', '5', '4', '3', '2', '1', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+      [nil, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7]
+    ]
+  end
+
   def convert(move, color)
     return check_castling(move, color) if check_castling(move, color)
 
@@ -45,25 +55,20 @@ class MoveConverter
   end
 
   def alg_move_to_array(alg_move, color)
-    alg_map = [
-      [nil, '8', '7', '6', '5', '4', '3', '2', '1', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
-      [nil, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7]
-    ]
-
-    dest_row = alg_map[1][alg_map[0].index(alg_move.slice(-1))]
-    dest_col = alg_map[1][alg_map[0].index(alg_move.slice(-2))]
+    dest_row = @alg_map[1][@alg_map[0].index(alg_move.slice(-1))]
+    dest_col = @alg_map[1][@alg_map[0].index(alg_move.slice(-2))]
 
     origin = alg_move[1..-3]
     case origin.length
     when 1
       if /[1-8]/.match?(origin)
-        orig_row = alg_map[1][alg_map[0].index(origin.slice(0))]
+        orig_row = @alg_map[1][@alg_map[0].index(origin.slice(0))]
       else
-        orig_col = alg_map[1][alg_map[0].index(origin.slice(0))]
+        orig_col = @alg_map[1][@alg_map[0].index(origin.slice(0))]
       end
     when 2
-      orig_row = alg_map[1][alg_map[0].index(origin.slice(1))]
-      orig_col = alg_map[1][alg_map[0].index(origin.slice(0))]
+      orig_row = @alg_map[1][@alg_map[0].index(origin.slice(1))]
+      orig_col = @alg_map[1][@alg_map[0].index(origin.slice(0))]
     end
 
     move_array = [alg_move.slice(0), [orig_row, orig_col], [dest_row, dest_col]]
@@ -72,19 +77,24 @@ class MoveConverter
   end
 
   def valid_move?(move)
-    validation_length_3 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}$/
-    validation_length_4 = /^[KQRNBP]{1}[a-h1-8]{1}[a-h]{1}[1-8]{1}$/
-    validation_length_5 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}[a-h]{1}[1-8]{1}$/
-
     case move.length
     when 3
-      move.match?(validation_length_3)
+      move.match?(@validation_length_3)
     when 4
-      move.match?(validation_length_4)
+      move.match?(@validation_length_4)
     when 5
-      move.match?(validation_length_5)
+      move.match?(@validation_length_5)
     else
       false
     end
+  end
+
+  def array_to_alg_move(move, capture)
+    piece = move[0].upcase
+    dest_col = @alg_map[0][@alg_map[1].index(move[2][1])]
+    dest_row = @alg_map[0][@alg_map[1].index(move[2][0])]
+    cap = capture.nil? ? '' : 'x'
+
+    "#{piece}#{cap}#{dest_col}#{dest_row}"
   end
 end
