@@ -9,17 +9,18 @@ require_relative 'file_manager'
 class Chess
   attr_reader :move_list
 
-  def initialize(position = %w[
-    rnbqkbnr
-    pppppppp
-    ........
-    ........
-    ........
-    ........
-    PPPPPPPP
-    RNBQKBNR
-  ])
-    @game_board = GameBoard.new(position)
+  def initialize(position = nil)
+    @initial_position = position || %w[
+      rnbqkbnr
+      pppppppp
+      ........
+      ........
+      ........
+      ........
+      PPPPPPPP
+      RNBQKBNR
+    ]
+    @game_board = GameBoard.new(@initial_position)
     @player1 = Player.new('W')
     @player2 = Player.new('B')
     @move_converter = MoveConverter.new
@@ -33,22 +34,16 @@ class Chess
       legal_moves = @game_board.legal_moves(@current_player.color)
       puts update_display
       move = ask_player_move(legal_moves) unless legal_moves.empty?
-      save_game(game_state) if move == 'save'
-      load_game if move == 'load'
-      return 'Exiting...' if move == 'exit'
-
+      new_save_load_exit(move) if %w[new save load exit].include?(move)
       if legal_moves.empty? || %w[draw resign].include?(move)
         game_over(move, legal_moves)
       else
-        make_move(move, legal_moves) unless %w[save load].include?(move)
+        make_move(move, legal_moves) unless %w[save load new].include?(move)
       end
     end
   end
 
   def make_move(move, legal_moves)
-    # TODO: Fix resigns logic so it will run. It all needs to be moved to end of move cycle.
-    return "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns." if move == 'resigns'
-
     capture = @game_board.move_piece(move)
     @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
                                                     in_check: @game_board.in_check?(@current_player.color))
@@ -59,13 +54,53 @@ class Chess
     player_in_check = @game_board.in_check?(@current_player.color)
     if legal_moves.empty? && player_in_check
       @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
+      puts "#{@current_player.color == 'W' ? 'Black' : 'White'} wins by checkmate.\n"
     elsif legal_moves.empty? && !player_in_check
       @move_list.push('stalemate', '½–½')
+      puts "#{@current_player.color == 'W' ? 'White' : 'Black'} is stalemated.\n"
     elsif move == 'draw'
       @move_list.push('(=)', '½–½')
+      puts 'Game drawn.'
     elsif move == 'resign'
       @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
+      puts "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns.\n"
     end
+    puts 'new : load : exit ?'
+    action = nil
+    until action
+      print '>> '
+      input = gets.chomp.strip.downcase
+      action = input if %w[new load exit].include?(input)
+    end
+    new_save_load_exit(action)
+  end
+
+  def new_save_load_exit(action)
+    case action
+    when 'new'
+      new_game
+    when 'save'
+      save_game(game_state)
+    when 'load'
+      load_game
+    when 'exit'
+      puts display_move_list
+      system(exit)
+    end
+  end
+
+  def display_move_list
+    display = "\n"
+    game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
+    win_condition = move_list.pop if %w[# stalemate (=) resigns].include?(move_list[-1])
+    move_list.compact!
+    move_list.push(nil) if move_list.length.odd?
+    unless move_list.empty?
+      (0..move_list.length - 2).step(2) do |index|
+        display += "#{(index + 2) / 2}. #{move_list[index]} #{move_list[index + 1]} "
+      end
+    end
+    display + "#{win_condition} #{game_result}\n"
   end
 
   def update_display
@@ -73,6 +108,7 @@ class Chess
     display = display_title
     display += display_current_player
     display += @game_board.display
+    display += display_move_list
     display + "\n"
   end
 
@@ -89,10 +125,10 @@ class Chess
       | (__| |__ | |  / _| ' \\/ -_|_-<_-<
        \\___|____|___| \\__|_||_\\___/__/__/
 
-        use algebraic notation to move
+         use algebraic notation to move
 
          options (type in lower case)
-      save : load : resign : draw : exit
+         save : load : new : resign : draw : exit
 
     HEREDOC
   end
@@ -108,7 +144,7 @@ class Chess
     accepted_move = false
     until accepted_move
       move = @current_player.ask_move
-      return move if %w[resign draw exit save load].include?(move)
+      return move if %w[save load new resign draw exit].include?(move)
 
       valid_move = @move_converter.convert(move, @current_player.color)
       accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
@@ -163,10 +199,12 @@ class Chess
 
   def load_game
     game_data = @file_manager.load_file
-    set_game_state(game_data)
+    new_game(game_data)
   end
 
-  def set_game_state(game_data)
+  def new_game(game_data = { current_player_color: 'W',
+                             move_list: [],
+                             position: @initial_position })
     @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
     @move_list = game_data[:move_list]
     @game_board = GameBoard.new(game_data[:position])

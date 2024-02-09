@@ -9,6 +9,7 @@ end
 
 class Conversation
   include Greetings
+  name3 = 'James'
 
   def initialize
     @name1 = 'Jack'
@@ -20,6 +21,7 @@ class Conversation
 
   def goodbye
     puts "Goodbye, #{@name2}."
+    puts "Goodbye, #{name3}."
   end
 end
 

@@ -12,4 +12,9 @@ class Player
     print '>> '
     gets.chomp.strip
   end
+
+  def ask_action
+    print '>> '
+    gets.chomp.strip.downcase
+  end
 end
