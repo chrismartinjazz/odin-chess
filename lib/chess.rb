@@ -39,11 +39,7 @@ class Chess
       input = gets.chomp.strip.downcase.slice(0)
       valid_input = input if %w[h c].include?(input)
     end
-    if valid_input == 'c'
-      PlayerComputer.new(color.slice(0))
-    else
-      PlayerHuman.new(color.slice(0))
-    end
+    input == 'c' ? PlayerComputer.new(color.slice(0)) : PlayerHuman.new(color.slice(0))
   end
 
   # Game play
@@ -53,11 +49,8 @@ class Chess
       puts update_display
       move = ask_player_move(legal_moves) unless legal_moves.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
-      if legal_moves.empty? || %w[draw resign].include?(move)
-        game_over(move, legal_moves)
-      else
-        make_move(move, legal_moves) unless %w[save load new].include?(move)
-      end
+      game_over if legal_moves.empty? || %w[draw resign].include?(move)
+      make_move(move, legal_moves) unless %w[new save load].include?(move)
     end
   end
 
@@ -234,7 +227,7 @@ class Chess
     game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
     win_condition = move_list.pop if %w[# stalemate (=) resigns].include?(move_list[-1])
     collated_move_list = collate_move_list
-    "\n#{collated_move_list}\n#{win_condition} #{game_result}\n"
+    "\n#{collated_move_list}#{win_condition} #{game_result}\n"
   end
 
   def collate_move_list

@@ -26,8 +26,8 @@ class GameBoard
     @en_passant_option = nil
   end
 
-  # A move has format [<piece>, <origin>, <destination>].
-  # Returns the initial occupant of the destination square (nil, or a Piece)
+  ## Making moves
+  # A move is array in format [<piece>, <origin>, <destination>]
   def move_piece(move, promotion_piece = nil, testing_for_check: false)
     destination_square_occupant = make_move(move[1], move[2])
     if testing_for_check == false
@@ -46,6 +46,16 @@ class GameBoard
     @board[destination[0]][destination[1]] = @board[origin[0]][origin[1]]
     @board[origin[0]][origin[1]] = nil
     destination_square_occupant
+  end
+
+  ## Handling specific moves
+  ### Castling
+  def castle(move)
+    rook_letter = move[0] == 'K' ? 'R' : 'r'
+    rook_row = move[1][0]
+    rook_start_col = move[2][1] == 2 ? 0 : 7
+    rook_end_col = move[2][1] == 2 ? 3 : 5
+    move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
   end
 
   def update_can_castle(start_sq)
@@ -67,44 +77,11 @@ class GameBoard
     end
   end
 
-  def test_for_check?(move)
-    player_color = move[0].upcase == move[0] ? 'W' : 'B'
-    # Make the move and test for check
-    original_occupant = move_piece(move, testing_for_check: true)
-    @king_position = find_king(player_color) if move[0].upcase == 'K'
-    in_check = in_check?(player_color)
-    # Undo the move - reverse it and restore original occupant
-    move_piece([move[0], move[2], move[1]], testing_for_check: true)
-    @king_position = find_king(player_color) if move[0].upcase == 'K'
-    @board[move[2][0]][move[2][1]] = original_occupant
-    # Return the true or false result
-    in_check
-  end
-
-  def in_check?(color)
-    # king_position = find_king(color)
-    return false if @king_position.nil?
-
-    opponent_color = color == 'W' ? 'B' : 'W'
-    opponent_legal_moves = legal_moves(opponent_color, active_player: false)
-    opponent_legal_moves.each do |move|
-      return true if move[2] == @king_position
-    end
-    false
-  end
-
   def castling?(move)
     move[0].upcase == 'K' && (move[1][1] - move[2][1]).abs == 2
   end
 
-  def castle(move)
-    rook_letter = move[0] == 'K' ? 'R' : 'r'
-    rook_row = move[1][0]
-    rook_start_col = move[2][1] == 2 ? 0 : 7
-    rook_end_col = move[2][1] == 2 ? 3 : 5
-    move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
-  end
-
+  ### Pawns
   def promote_pawn(move, promotion_piece)
     color = move[0] == 'P' ? 'W' : 'B'
     map = {
@@ -129,9 +106,42 @@ class GameBoard
     row = move[1][0]
     col = move[1][1] + direction
 
+    en_passant_remove_pawn(row, col)
+  end
+
+  def en_passant_remove_pawn(row, col)
     captured_pawn = @board[row][col]
     @board[row][col] = nil
     captured_pawn
+  end
+
+  ## Testing for check - this could move to a class (as king_position can change state).
+  # Has to access move_piece. Parameters move,
+  def test_for_check?(move)
+    player_color = move[0].upcase == move[0] ? 'W' : 'B'
+    # Make the move and test for check, storing the original occupant to undo move later.
+    original_occupant = move_piece(move, testing_for_check: true)
+    @king_position = find_king(player_color) if move[0].upcase == 'K'
+    in_check = in_check?(player_color)
+    undo_move(player_color, move, original_occupant)
+    in_check
+  end
+
+  def in_check?(color)
+    return false if @king_position.nil?
+
+    opponent_color = color == 'W' ? 'B' : 'W'
+    opponent_legal_moves = legal_moves(opponent_color, active_player: false)
+    opponent_legal_moves.each do |move|
+      return true if move[2] == @king_position
+    end
+    false
+  end
+
+  def undo_move(player_color, move, original_occupant)
+    move_piece([move[0], move[2], move[1]], testing_for_check: true)
+    @king_position = find_king(player_color) if move[0].upcase == 'K'
+    @board[move[2][0]][move[2][1]] = original_occupant
   end
 
   def find_king(color)
@@ -143,6 +153,7 @@ class GameBoard
     nil
   end
 
+  ## Other
   def display
     @board_displayer.display(@board)
   end
