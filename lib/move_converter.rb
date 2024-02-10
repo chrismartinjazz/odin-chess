@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 # TODO: This should definitely be a module instead - all behaviour, no state.
+# rubocop:disable Metrics/ClassLength
+
+# Converts move array [<piece>, <origin>, <destination>] to and from standard algebraic notation
 class MoveConverter
   def initialize
     @validation_length3 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}$/
     @validation_length4 = /^[KQRNBP]{1}[a-h1-8]{1}[a-h]{1}[1-8]{1}$/
     @validation_length5 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}[a-h]{1}[1-8]{1}$/
-    # TODO: CHange these to hashes as well.
-    @alg_map_row = [[nil, '8', '7', '6', '5', '4', '3', '2', '1'], [nil, 0, 1, 2, 3, 4, 5, 6, 7]]
-    @alg_map_col = [[nil, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], [nil, 0, 1, 2, 3, 4, 5, 6, 7]]
+    @alg_map_row = { nil => nil, '8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7 }
+    @alg_map_col = { nil => nil, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7 }
     @array_map_castling = {
       ['K', [7, 4], [7, 6]] => '0-0',
       ['K', [7, 4], [7, 2]] => '0-0-0',
@@ -18,21 +20,24 @@ class MoveConverter
   end
 
   def convert(move, color)
+    # First handle castling (e.g. '0-0') and strings that do not appear to attempt an algebraic move e.g. 'cat'
     return check_castling(move, color) if check_castling(move, color)
 
     return nil unless attempted_move?(move)
 
-    # Strip non-algebraic move characters,
-    # prepend P if first letter in not capitalized,
-    # then check it has valid characters in each position and is the right length.
+    # Strip non-algebraic move characters, and return nil if nothing is left (backup check for attempted move)
     alg_move = strip_chars(move)
     return nil if alg_move == ''
 
+    # Prepend P if first letter in not capitalized
     alg_move.prepend('P') unless alg_move.slice(0).ord.between?(65, 90)
+
+    # Check the move has valid characters in each position and is the right length.
     return nil unless valid_move?(alg_move)
 
     # Move is now 3-5 characters, in format:
     # Piece, (opt. disambiguation 1, opt. disambiguation 2), destination column, destination row
+    # Return it converted to an array.
     alg_move_to_array(alg_move, color)
   end
 
@@ -61,25 +66,28 @@ class MoveConverter
   end
 
   def alg_move_to_array(alg_move, color)
-    dest_row = @alg_map_row[1][@alg_map_row[0].index(alg_move.slice(-1))]
-    dest_col = @alg_map_col[1][@alg_map_col[0].index(alg_move.slice(-2))]
+    piece = color == 'W' ? alg_move.slice(0) : alg_move.slice(0).downcase
+    origin_square = alg_move_origin_square(alg_move)
+    destination_square = alg_move_destination_square(alg_move)
+    [piece, origin_square, destination_square]
+  end
 
+  def alg_move_destination_square(alg_move)
+    dest_row = @alg_map_row[alg_move.slice(-1)]
+    dest_col = @alg_map_col[alg_move.slice(-2)]
+    [dest_row, dest_col]
+  end
+
+  def alg_move_origin_square(alg_move)
     origin = alg_move[1..-3]
     case origin.length
     when 1
-      if /[1-8]/.match?(origin)
-        orig_row = @alg_map_row[1][@alg_map_row[0].index(origin.slice(0))]
-      else
-        orig_col = @alg_map_col[1][@alg_map_col[0].index(origin.slice(0))]
-      end
+      /[1-8]/.match?(origin) ? orig_row = @alg_map_row[origin] : orig_col = @alg_map_col[origin]
     when 2
-      orig_row = @alg_map_row[1][@alg_map_row[0].index(origin.slice(1))]
-      orig_col = @alg_map_col[1][@alg_map_col[0].index(origin.slice(0))]
+      orig_row = @alg_map_row[origin.slice(1)]
+      orig_col = @alg_map_col[origin.slice(0)]
     end
-
-    move_array = [alg_move.slice(0), [orig_row, orig_col], [dest_row, dest_col]]
-    move_array[0].downcase! if color == 'B'
-    move_array
+    [orig_row, orig_col]
   end
 
   def valid_move?(move)
@@ -98,32 +106,37 @@ class MoveConverter
   def array_to_alg_move(move, capture = nil, legal_moves = nil, in_check: false)
     return array_check_castling(move) if array_check_castling(move)
 
-    return move if %w[# stalemate resigns].include?(move)
+    return move unless move.length == 3
 
     piece_char = move[0].upcase
 
-    piece = piece_char == 'P' ? '' : move[0].upcase
+    piece = piece_char == 'P' ? '' : piece_char
     disambiguation = array_disambiguate_move(move, legal_moves)
     pawn_col = array_pawn_capture(move, capture, piece_char)
     capturing = array_capturing(move, capture, piece_char)
-    dest_col = @alg_map_col[0][@alg_map_col[1].index(move[2][1])]
-    dest_row = @alg_map_row[0][@alg_map_row[1].index(move[2][0])]
+    destination = array_destination(move)
     pawn_prom = array_pawn_prom(move, capture, piece_char)
     check = in_check ? '+' : ''
 
-    "#{piece}#{disambiguation[0]}#{disambiguation[1]}#{pawn_col}#{capturing}#{dest_col}#{dest_row}#{pawn_prom}#{check}"
+    # E.g., with dots in place of missing elements: "Qa1xa3.+", ".d.xe4..", "....e8Q."
+    "#{piece}#{disambiguation.join}#{pawn_col}#{capturing}#{destination.join}#{pawn_prom}#{check}"
   end
 
   def array_disambiguate_move(move, legal_moves)
-    disambiguation = ['', '']
-    return disambiguation unless legal_moves
+    return ['', ''] unless legal_moves
 
     matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
+    [array_disambiguate_col(move, matches), array_disambiguate_row(move, matches)]
+  end
+
+  def array_disambiguate_col(move, matches)
     match_col = matches.select { |legal_move| legal_move[1][0] == move[1][0] }
+    match_col.length > 1 ? @alg_map_col.key(move[1][1]) : ''
+  end
+
+  def array_disambiguate_row(move, matches)
     match_row = matches.select { |legal_move| legal_move[1][1] == move[1][1] }
-    disambiguation[0] = @alg_map_col[0][@alg_map_col[1].index(move[1][1])] if match_col.length > 1
-    disambiguation[1] = @alg_map_row[0][@alg_map_row[1].index(move[1][0])] if match_row.length > 1
-    disambiguation
+    match_row.length > 1 ? @alg_map_row.key(move[1][0]) : ''
   end
 
   def array_check_castling(move)
@@ -133,14 +146,20 @@ class MoveConverter
   def array_pawn_capture(move, capture, piece_char)
     return '' unless piece_char == 'P' && !capture.nil? && move[1][1] != move[2][1]
 
-    @alg_map_col[0][@alg_map_col[1].index(move[1][1])]
+    @alg_map_col.key(move[1][1])
   end
 
   def array_capturing(move, capture, piece_char)
     capture.nil? || (piece_char == 'P' && move[1][1] == move[2][1]) ? '' : 'x'
   end
 
+  def array_destination(move)
+    [@alg_map_col.key(move[2][1]), @alg_map_row.key(move[2][0])]
+  end
+
   def array_pawn_prom(move, capture, piece_char)
-    piece_char == 'P' && (move[2][0] == 0 || move[2][0] == 7) ? capture.to_s.upcase : ''
+    piece_char == 'P' && (move[2][0].zero? || move[2][0] == 7) ? capture.to_s.upcase : ''
   end
 end
+
+# rubocop:enable Metrics/ClassLength

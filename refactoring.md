@@ -1,6 +1,6 @@
-Structure
+# Structure
 
-- Chess (278)
+## Chess (278)
 - Chess knows
     - The current player
     - The sequence of moves in the game
@@ -13,9 +13,11 @@ Structure
     - Nothing
 - Chess is responsible for
     - Running the game loop
+    - Identifying if a given move is unique in the set of legal moves (could move to MoveConverter?). No 'change of state' involved
+    - Handling the end of game / save / load options. No 'change of state'.
+    - Displaying the game state. No 'change of state'.
 
-
-- GameBoard (164)
+## GameBoard (164)
 - GameBoard knows
     - The state of the board
     - If castling is possible
@@ -30,7 +32,7 @@ Structure
     - Moving pieces
     - Testing for check
 
-- Player (47)
+## Player (47)
 - Player knows
     - Their own color
 - Player holds onto
@@ -38,7 +40,9 @@ Structure
 - Player includes
     - Nothing
 - Player is reponsible for
-    - Selecting moves
+    - Selecting and communicating moves
 
-- MoveConverter
+## MoveConverter (147)
 - MoveConverter knows
+    - Constants only - regex validations and hashes.
+
