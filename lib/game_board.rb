@@ -5,6 +5,8 @@ require_relative 'pieces'
 require_relative 'position_read_write'
 require_relative 'board_displayer'
 require_relative 'legal_moves'
+# rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/MethodLength
 
 # Holds the pieces and finds legal moves
 class GameBoard
@@ -42,6 +44,8 @@ class GameBoard
 
     en_passant_captured_pawn || promotion_piece || destination_square_occupant
   end
+
+  def board_square(row, col); end
 
   def update_can_castle(start_sq)
     case start_sq
@@ -146,3 +150,5 @@ class GameBoard
     @position_read_write.write_position(@board)
   end
 end
+# rubocop:enable Metrics/ClassLength
+# rubocop:enable Metrics/MethodLength

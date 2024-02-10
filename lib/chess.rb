@@ -5,7 +5,6 @@ require_relative 'player'
 require_relative 'move_converter'
 require_relative 'file_manager'
 # rubocop:disable Metrics/ClassLength
-# rubocop:disable Metrics/MethodLength
 
 # The main game loop
 class Chess
@@ -33,10 +32,10 @@ class Chess
 
   # Initialization
   def ask_player_type(color)
-    puts "#{color} player is (h)uman or (c)omputer:"
+    puts "\n#{color} player is (h)uman or (c)omputer:"
     valid_input = nil
     until valid_input
-      print '>>'
+      print '>> '
       input = gets.chomp.strip.downcase.slice(0)
       valid_input = input if %w[h c].include?(input)
     end
@@ -130,30 +129,52 @@ class Chess
     @current_player = @current_player == @player1 ? @player2 : @player1
   end
 
-  # Handle game save/load/game over
+  # Handle game end/save/load/game over
   def game_over(move, legal_moves)
     player_in_check = @game_board.in_check?(@current_player.color)
     if legal_moves.empty? && player_in_check
-      @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
-      puts "#{@current_player.color == 'W' ? 'Black' : 'White'} wins by checkmate.\n"
+      message = handle_checkmate
     elsif legal_moves.empty? && !player_in_check
-      @move_list.push('stalemate', '½–½')
-      puts "#{@current_player.color == 'W' ? 'White' : 'Black'} is stalemated.\n"
+      message = handle_stalemate
     elsif move == 'draw'
-      @move_list.push('(=)', '½–½')
-      puts 'Game drawn.'
+      message = handle_draw
     elsif move == 'resign'
-      @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
-      puts "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns.\n"
+      message = handle_resign
     end
-    puts 'new : load : exit ?'
+    puts update_display
+    puts message
+    new_save_load_exit(ask_game_over_action)
+  end
+
+  def handle_checkmate
+    @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
+    "#{@current_player.color == 'W' ? 'Black' : 'White'} wins by checkmate.\n\n"
+  end
+
+  def handle_stalemate
+    @move_list.push('stalemate', '½–½')
+    "#{@current_player.color == 'W' ? 'White' : 'Black'} is stalemated.\n\n"
+  end
+
+  def handle_draw
+    @move_list.push('(=)', '½–½')
+    message = 'Game drawn.'
+  end
+
+  def handle_resign
+    @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
+    "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns.\n\n"
+  end
+
+  def ask_game_over_action
     action = nil
+    puts 'new : load : exit ?'
     until action
       print '>> '
       input = gets.chomp.strip.downcase
       action = input if %w[new load exit].include?(input)
     end
-    new_save_load_exit(action)
+    action
   end
 
   # Handle game save/load/game over
@@ -173,31 +194,11 @@ class Chess
 
   # ===========================MOVE TO DISPLAY MODULE?
   # Display the board etc.
-  def display_move_list
-    display = "\n"
-    game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
-    win_condition = move_list.pop if %w[# stalemate (=) resigns].include?(move_list[-1])
-    move_list.compact!
-    move_list.push(nil) if move_list.length.odd?
-    unless move_list.empty?
-      (0..move_list.length - 2).step(2) do |index|
-        display += "#{(index + 2) / 2}. #{move_list[index]} #{move_list[index + 1]} "
-      end
-    end
-    display + "#{win_condition} #{game_result}\n"
-  end
-
-  # Display
   def update_display
     clear_screen
-    display = display_title
-    display += display_current_player
-    display += @game_board.display
-    display += display_move_list
-    display + "\n"
+    "#{display_title}#{display_current_player}#{@game_board.display}#{display_move_list}\n"
   end
 
-  # Display
   def clear_screen(testing: false)
     return if testing == true
 
@@ -222,10 +223,34 @@ class Chess
 
   # Display
   def display_current_player
+    <<~HEREDOC
+      #{@current_player.color == 'W' ? '>> White <<' : '   White'}
+      #{@current_player.color == 'B' ? '>> Black <<' : '   Black'}
+
+    HEREDOC
+  end
+
+  def display_move_list
+    game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
+    win_condition = move_list.pop if %w[# stalemate (=) resigns].include?(move_list[-1])
+    collated_move_list = collate_move_list
+    "\n#{collated_move_list}\n#{win_condition} #{game_result}\n"
+  end
+
+  def collate_move_list
     display = ''
-    display += @current_player.color == 'W' ? ">> White <<\n" : "   White\n"
-    display += @current_player.color == 'B' ? ">> Black <<\n" : "   Black\n"
-    display + "\n"
+    move_list.compact!
+    move_list.push(nil) if move_list.length.odd?
+    return display if move_list.empty?
+
+    (0..move_list.length - 2).step(2) do |pair_index|
+      display += collate_move_pair(pair_index)
+    end
+    display
+  end
+
+  def collate_move_pair(pair_index)
+    "#{(pair_index + 2) / 2}. #{move_list[pair_index]} #{move_list[pair_index + 1]} "
   end
 
   # ==================================================MOVE TO SAVE GAME MODULE
@@ -260,4 +285,3 @@ class Chess
 end
 
 # rubocop:enable Metrics/ClassLength
-# rubocop:enable Metrics/MethodLength
