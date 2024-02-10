@@ -29,10 +29,7 @@ class GameBoard
   # A move has format [<piece>, <origin>, <destination>].
   # Returns the initial occupant of the destination square (nil, or a Piece)
   def move_piece(move, promotion_piece = nil, testing_for_check: false)
-    destination_square_occupant = @board[move[2][0]][move[2][1]]
-    @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
-    @board[move[1][0]][move[1][1]] = nil
-
+    destination_square_occupant = make_move(move[1], move[2])
     if testing_for_check == false
       castle(move) if castling?(move)
       update_can_castle(move[1])
@@ -41,11 +38,15 @@ class GameBoard
       @en_passant_options = nil
       pawn_two_square_advance(move)
     end
-
     en_passant_captured_pawn || promotion_piece || destination_square_occupant
   end
 
-  def board_square(row, col); end
+  def make_move(origin, destination)
+    destination_square_occupant = @board[destination[0]][destination[1]]
+    @board[destination[0]][destination[1]] = @board[origin[0]][origin[1]]
+    @board[origin[0]][origin[1]] = nil
+    destination_square_occupant
+  end
 
   def update_can_castle(start_sq)
     case start_sq
@@ -67,7 +68,7 @@ class GameBoard
   end
 
   def test_for_check?(move)
-    player_color = move[0].ord < 97 ? 'W' : 'B'
+    player_color = move[0].upcase == move[0] ? 'W' : 'B'
     # Make the move and test for check
     original_occupant = move_piece(move, testing_for_check: true)
     @king_position = find_king(player_color) if move[0].upcase == 'K'
