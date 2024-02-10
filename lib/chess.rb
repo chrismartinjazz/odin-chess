@@ -59,8 +59,11 @@ class Chess
   end
 
   def make_move(move, legal_moves)
-    capture = @game_board.move_piece(move)
-    # TODO: move ask_promotion_piece here so computer can promote.
+    promotion_piece = nil
+    if move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
+      promotion_piece = @current_player.ask_promotion_piece
+    end
+    capture = @game_board.move_piece(move, promotion_piece)
     @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
                                                     in_check: @game_board.in_check?(@current_player.color))
     next_player

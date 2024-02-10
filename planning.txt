@@ -259,10 +259,12 @@ Tidy display and clear_display
 * DONE
 
 Reverse parser - move -> algebraic
+* DONE
 
 Computer opponent (random legal move only)
+* DONE
 
-Introductory message
+Refactoring and tidying
 
 
   ___ _    ___      _              
@@ -552,7 +554,36 @@ Possible other things to implement:
 			King + knight
 	
     
-- game_board.in_check?
+End game...
+Game ends through:
+  win_condition
+  checkmate #           We know at start of move - and must not ask for a move
+  stalemate stalemate   We know at start of move - and must not ask for a move
+  draw      (=)         We know either at the start (insufficient material) or after asking for a move
+  resigns   resigns     We know after asking for a move, and write this at end of scoresheet e.g. "White resigns".
+  
+  game_result
+  white win 1-0         We know based on the @current_player
+  black win 0-1         We know based on the @current_player
+  draw      ½–½         We know based on the win condition
+
+The move list is just an ordered list of moves so append '#' '1-0' to end. Updated sequence:
+- Test for checkmate, stalemate, draw by insufficient material (legal_moves)
+- Ask for a move if not checkmate / stalemate / draw
+- If checkmate/stalemate/draw/resigns then game_over
+  - Add the win_condition to move_list
+  - Add the game_result to move_list
+  - Ask if want to save the game, load another game, or exit
+  - If quitting, output the moves in a pretty_print
+- If not, make the move
+
+Promotion of pawn - new logic
+
+Chess
+#game_loop
+#ask_player_move ...
+#ask_promotion_piece 'Q'
+
 
 Game of the century!
 Nf3
