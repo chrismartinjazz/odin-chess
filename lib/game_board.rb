@@ -26,7 +26,7 @@ class GameBoard
 
   # A move has format [<piece>, <origin>, <destination>].
   # Returns the initial occupant of the destination square (nil, or a Piece)
-  def move_piece(move, testing_for_check: false)
+  def move_piece(move, promotion_piece = nil, testing_for_check: false)
     destination_square_occupant = @board[move[2][0]][move[2][1]]
     @board[move[2][0]][move[2][1]] = @board[move[1][0]][move[1][1]]
     @board[move[1][0]][move[1][1]] = nil
@@ -34,7 +34,7 @@ class GameBoard
     if testing_for_check == false
       castle(move) if castling?(move)
       update_can_castle(move[1])
-      promotion_piece = promote_pawn(move, ask_promotion_piece) if pawn_promoting?(move)
+      promote_pawn(move, promotion_piece) if promotion_piece
       en_passant_captured_pawn = en_passant_capture(move)
       @en_passant_options = nil
       pawn_two_square_advance(move)
@@ -98,21 +98,6 @@ class GameBoard
     rook_start_col = move[2][1] == 2 ? 0 : 7
     rook_end_col = move[2][1] == 2 ? 3 : 5
     move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
-  end
-
-  def pawn_promoting?(move)
-    move[0].upcase == 'P' && ((move[2][0]).zero? || move[2][0] == 7)
-  end
-
-  def ask_promotion_piece
-    puts 'Promote to Q - Queen : R - Rook : B - Bishop : N - Knight'
-    options = %w[Q R B N]
-    input = ''
-    until options.include?(input)
-      print '>> '
-      input = gets.chomp.strip.upcase.slice(0)
-    end
-    input
   end
 
   def promote_pawn(move, promotion_piece)

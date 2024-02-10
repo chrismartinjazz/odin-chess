@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../lib/game_board'
+require_relative '../lib/pieces'
 
 describe GameBoard do
   subject(:game_board) { described_class.new }
@@ -301,43 +302,21 @@ describe GameBoard do
   subject(:board_pawn_prom) { described_class.new(pawn_prom) }
 
   context 'When a pawn is promoting' do
-    describe '#pawn_promoting?' do
-      it 'identifies a pawn promotion move' do
-        move = ['P', [1, 0], [0, 0]]
-        expect(board_pawn_prom.pawn_promoting?(move)).to be true
-      end
-
-      it 'identifies a pawn move that is not a promotion' do
-        move = ['P', [2, 3], [1, 3]]
-        expect(board_pawn_prom.pawn_promoting?(move)).to be false
-      end
-    end
-
     describe '#promote_pawn' do
-      before do
-        allow(board_pawn_prom).to receive(:ask_promotion_piece) { 'Q' }
-        $stdout = StringIO.new
-      end
-
       it 'promotes a pawn to a queen' do
         move = ['P', [1, 0], [0, 0]]
 
-        board_pawn_prom.move_piece(move)
+        board_pawn_prom.move_piece(move, 'Q')
         expect(board_pawn_prom.board[0][0]).to be_a Queen
         expect(board_pawn_prom.board[1][0]).to be nil
       end
     end
 
     describe '#promote_pawn' do
-      before do
-        allow(board_pawn_prom).to receive(:ask_promotion_piece) { 'R' }
-        $stdout = StringIO.new
-      end
-
       it 'promotes a pawn to a rook' do
         move = ['P', [1, 0], [0, 0]]
 
-        board_pawn_prom.move_piece(move)
+        board_pawn_prom.move_piece(move, 'R')
         expect(board_pawn_prom.board[0][0]).to be_a Rook
         expect(board_pawn_prom.board[1][0]).to be nil
       end

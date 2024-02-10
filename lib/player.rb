@@ -17,6 +17,17 @@ class PlayerHuman < Player
     print '>> '
     gets.chomp.strip
   end
+
+  def ask_promotion_piece
+    puts 'Promote to Q - Queen : R - Rook : B - Bishop : N - Knight'
+    options = %w[Q R B N]
+    input = ''
+    until options.include?(input)
+      print '>> '
+      input = gets.chomp.strip.upcase.slice(0)
+    end
+    input
+  end
 end
 
 # A computer player - selects a random legal move
@@ -28,5 +39,9 @@ class PlayerComputer < Player
 
   def ask_move(legal_moves = nil)
     @move_converter.array_to_alg_move(legal_moves.sample)
+  end
+
+  def ask_promotion_piece
+    %w[Q R B N].sample
   end
 end
