@@ -111,18 +111,18 @@ class Chess
   end
 
   def disambiguate_matching_square(move, matches)
-    matching_moves = matches.select { |match| match[1] == move[1] }
-    row_col[0] if matching_moves.size == 1
+    matching_square = matches.select { |match| match[1] == move[1] }
+    matching_square[0] if matching_square.size == 1
   end
 
   def disambiguate_matching_row(move, matches)
-    matching_moves = matches.select { |match| match[1][0] == move[1][0] }
-    row_col[0] if matching_moves.size == 1
+    matching_row = matches.select { |match| match[1][0] == move[1][0] }
+    matching_row[0] if matching_row.size == 1
   end
 
   def disambiguate_matching_col(move, matches)
-    matching_moves = matches.select { |match| match[0][1] == move[0][1] }
-    row_col[0] if matching_moves.size == 1
+    matching_col = matches.select { |match| match[1][1] == move[1][1] }
+    matching_col[0] if matching_col.size == 1
   end
 
   # Game play
