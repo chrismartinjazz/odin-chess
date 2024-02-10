@@ -20,13 +20,13 @@ class PlayerHuman < Player
 
   def ask_promotion_piece
     puts 'Promote to Q - Queen : R - Rook : B - Bishop : N - Knight'
-    options = %w[Q R B N]
+    options = %w[Q R B N QUEEN ROOK BISHOP KNIGHT]
     input = ''
     until options.include?(input)
       print '>> '
-      input = gets.chomp.strip.upcase.slice(0)
+      input = gets.chomp.strip.upcase
     end
-    input
+    input.slice(0)
   end
 end
 

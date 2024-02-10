@@ -81,8 +81,15 @@ class Chess
     move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
   end
 
+  # Game play
+  def next_player
+    @current_player = @current_player == @player1 ? @player2 : @player1
+  end
+
   # Could these methods and logic go into MoveConverter? Yes but then MoveConverter is coupled through to legal_moves.
-  # So this is the 'part' of the move analysis that links together the legal_moves and the move_converter.
+  # MoveConverter just knows how to convert algebraic notation to a move and vice versa.
+  # I guess it could be given legal_moves as an optional parameter? Possible.
+  # Currently this is the 'part' of the move analysis that links together the legal_moves and the move_converter.
   def in_legal_moves(move, legal_moves)
     matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
     case matches.length
@@ -115,11 +122,6 @@ class Chess
   def disambiguate_matching_col(move, matches)
     matching_col = matches.select { |match| match[1][1] == move[1][1] }
     matching_col[0] if matching_col.size == 1
-  end
-
-  # Game play
-  def next_player
-    @current_player = @current_player == @player1 ? @player2 : @player1
   end
 
   # Handle game end/save/load/game over
