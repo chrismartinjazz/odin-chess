@@ -4,6 +4,8 @@ require_relative 'game_board'
 require_relative 'player'
 require_relative 'move_converter'
 require_relative 'file_manager'
+# rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/MethodLength
 
 # The main game loop
 class Chess
@@ -29,6 +31,7 @@ class Chess
     @file_manager = FileManager.new
   end
 
+  # Initialization
   def ask_player_type(color)
     puts "#{color} player is (h)uman or (c)omputer:"
     valid_input = nil
@@ -44,6 +47,7 @@ class Chess
     end
   end
 
+  # Game play
   def game_loop
     loop do
       legal_moves = @game_board.legal_moves(@current_player.color)
@@ -58,17 +62,75 @@ class Chess
     end
   end
 
-  def make_move(move, legal_moves)
-    promotion_piece = nil
-    if move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
-      promotion_piece = @current_player.ask_promotion_piece
+  # Game play
+  def ask_player_move(legal_moves)
+    accepted_move = false
+    until accepted_move
+      move = @current_player.ask_move(legal_moves)
+      return move if %w[save load new resign draw exit].include?(move)
+
+      valid_move = @move_converter.convert(move, @current_player.color)
+      accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
     end
+    sleep(0.5) if @current_player.is_a?(PlayerComputer)
+    accepted_move
+  end
+
+  # Game play
+  def make_move(move, legal_moves)
+    promotion_piece = @current_player.ask_promotion_piece if pawn_promoting?(move)
     capture = @game_board.move_piece(move, promotion_piece)
     @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
                                                     in_check: @game_board.in_check?(@current_player.color))
     next_player
   end
 
+  def pawn_promoting?(move)
+    move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
+  end
+
+  # Could these methods and logic go into MoveConverter? Yes but then MoveConverter is coupled through to legal_moves.
+  # So this is the 'part' of the move analysis that links together the legal_moves and the move_converter.
+  def in_legal_moves(move, legal_moves)
+    matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
+    case matches.length
+    when 0
+      false
+    when 1
+      matches[0]
+    else
+      disambiguate_move(move, matches)
+    end
+  end
+
+  def disambiguate_move(move, matches)
+    disambiguate_matching_square(move, matches) ||
+      disambiguate_matching_row(move, matches) ||
+      disambiguate_matching_col(move, matches) ||
+      false
+  end
+
+  def disambiguate_matching_square(move, matches)
+    matching_moves = matches.select { |match| match[1] == move[1] }
+    row_col[0] if matching_moves.size == 1
+  end
+
+  def disambiguate_matching_row(move, matches)
+    matching_moves = matches.select { |match| match[1][0] == move[1][0] }
+    row_col[0] if matching_moves.size == 1
+  end
+
+  def disambiguate_matching_col(move, matches)
+    matching_moves = matches.select { |match| match[0][1] == move[0][1] }
+    row_col[0] if matching_moves.size == 1
+  end
+
+  # Game play
+  def next_player
+    @current_player = @current_player == @player1 ? @player2 : @player1
+  end
+
+  # Handle game save/load/game over
   def game_over(move, legal_moves)
     player_in_check = @game_board.in_check?(@current_player.color)
     if legal_moves.empty? && player_in_check
@@ -94,6 +156,7 @@ class Chess
     new_save_load_exit(action)
   end
 
+  # Handle game save/load/game over
   def new_save_load_exit(action)
     case action
     when 'new'
@@ -108,6 +171,8 @@ class Chess
     end
   end
 
+  # ===========================MOVE TO DISPLAY MODULE?
+  # Display the board etc.
   def display_move_list
     display = "\n"
     game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
@@ -122,6 +187,7 @@ class Chess
     display + "#{win_condition} #{game_result}\n"
   end
 
+  # Display
   def update_display
     clear_screen
     display = display_title
@@ -131,12 +197,14 @@ class Chess
     display + "\n"
   end
 
+  # Display
   def clear_screen(testing: false)
     return if testing == true
 
     Gem.win_platform? ? (system 'cls') : (system 'clear')
   end
 
+  # Display
   def display_title
     <<~HEREDOC
         ___ _    ___      _
@@ -152,6 +220,7 @@ class Chess
     HEREDOC
   end
 
+  # Display
   def display_current_player
     display = ''
     display += @current_player.color == 'W' ? ">> White <<\n" : "   White\n"
@@ -159,49 +228,8 @@ class Chess
     display + "\n"
   end
 
-  def ask_player_move(legal_moves)
-    accepted_move = false
-    until accepted_move
-      move = @current_player.ask_move(legal_moves)
-      return move if %w[save load new resign draw exit].include?(move)
-
-      valid_move = @move_converter.convert(move, @current_player.color)
-      accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
-    end
-    sleep(0.5) if @current_player.is_a?(PlayerComputer)
-    accepted_move
-  end
-
-  def in_legal_moves(move, legal_moves)
-    matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
-    case matches.length
-    when 0
-      false
-    when 1
-      matches[0]
-    else
-      disambiguate_move(move, matches)
-    end
-  end
-
-  def disambiguate_move(move, matches)
-    # Disambiguation - original row&col, row, column
-    row_col = matches.select { |match| match[1] == move[1] }
-    return row_col[0] if row_col.size == 1
-
-    row = matches.select { |match| match[1][0] == move[1][0] }
-    return row[0] if row.size == 1
-
-    col = matches.select { |match| match[1][1] == move[1][1] }
-    return col[0] if col.size == 1
-
-    false
-  end
-
-  def next_player
-    @current_player = @current_player == @player1 ? @player2 : @player1
-  end
-
+  # ==================================================MOVE TO SAVE GAME MODULE
+  # Saving and loading of the game - needs to be elsewhere.
   def game_state
     {
       current_player_color: @current_player.color,
@@ -230,3 +258,6 @@ class Chess
     @game_board = GameBoard.new(game_data[:position])
   end
 end
+
+# rubocop:enable Metrics/ClassLength
+# rubocop:enable Metrics/MethodLength

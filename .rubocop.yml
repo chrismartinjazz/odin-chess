@@ -1,4 +1,5 @@
 AllCops:
+  TargetRubyVersion: 3.2.2
   Exclude:
     - 'Gemfile'
     - 'spec/spec_helper.rb'
@@ -6,8 +7,9 @@ AllCops:
 Metrics/BlockLength:
   Exclude:
     - 'spec/*'
-    - 'spec_answers/*'
+Metrics/ClassLength:
+  Exclude:
+    - 'spec/*'
 Layout/LineLength:
   Exclude:
     - 'spec/*'
-    - 'spec_answers/*'

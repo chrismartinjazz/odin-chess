@@ -35,7 +35,7 @@ PLATFORMS
 
 DEPENDENCIES
   colorize
-  rubocop
+  rubocop (~> 1.60)
 
 BUNDLED WITH
    2.5.5
