@@ -2,44 +2,47 @@
 
 require 'colorize'
 
-# Converts a board with piece objects into a coloured string.
+# Converts a board with piece objects into a colorized string with icons.
 class BoardDisplayer
+  ICON_MAP = { 'K' => '♚ ', 'Q' => '♛ ', 'R' => '♜ ', 'B' => '♝ ', 'N' => '♞ ', 'P' => '♟︎ ',
+               'k' => '♔ ', 'q' => '♕ ', 'r' => '♖ ', 'b' => '♗ ', 'n' => '♘ ', 'p' => '♙ ' }.freeze
+
   def display(board, string = '')
-    # Convert the board to array of piece pictures with spaces for empty square
-    board_copy = board_to_strings(board)
+    board_icons = convert_board_to_icons(board)
     # For each pair of rows
     [0, 2, 4, 6].each do |row_pair_i|
-      # First row in pair
-      string += row_to_string(board_copy, row_pair_i, 0)
-      string += row_to_string(board_copy, row_pair_i, 1)
+      string += colorize_row(board_icons, row_pair_i, 0)
+      string += colorize_row(board_icons, row_pair_i, 1)
     end
     "#{string}  a b c d e f g h\n"
   end
 
-  def board_to_strings(board)
-    piece_map = [
-      ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'],
-      ['♚ ', '♛ ', '♜ ', '♝ ', '♞ ', '♟︎ ', '♔ ', '♕ ', '♖ ', '♗ ', '♘ ', '♙ ']
-    ]
-    board_copy = []
+  def convert_board_to_icons(board)
+    board_icons = []
     (0..7).each do |row_i|
-      new_row = board[row_i].map { |elem| elem.nil? ? '  ' : piece_map[1][piece_map[0].index(elem.to_s)] }
-      board_copy << new_row
+      new_row = board[row_i].map { |elem| elem.nil? ? '  ' : ICON_MAP[elem.to_s] }
+      board_icons << new_row
     end
-    board_copy
+    board_icons
   end
 
-  def row_to_string(board_copy, row_pair_i, offset = 0, string = '')
-    string += "#{8 - row_pair_i - offset} "
+  def colorize_row(board_icons, row_pair_i, offset = 0)
+    string = "#{8 - row_pair_i - offset} "
     [0, 2, 4, 6].each do |col_i|
-      if offset.zero?
-        string += board_copy[row_pair_i][col_i].on_grey
-        string += board_copy[row_pair_i][col_i + 1].on_magenta
-      else
-        string += board_copy[row_pair_i + 1][col_i].on_magenta
-        string += board_copy[row_pair_i + 1][col_i + 1].on_grey
-      end
+      string += if offset.zero?
+                  colorize_even_row_squares(board_icons, row_pair_i, col_i)
+                else
+                  colorize_odd_row_squares(board_icons, row_pair_i, col_i)
+                end
     end
-    string + "\n"
+    "#{string}\n"
+  end
+
+  def colorize_even_row_squares(board_icons, row_pair_i, col_i)
+    "#{board_icons[row_pair_i][col_i].on_grey}#{board_icons[row_pair_i][col_i + 1].on_magenta}"
+  end
+
+  def colorize_odd_row_squares(board_icons, row_pair_i, col_i)
+    "#{board_icons[row_pair_i + 1][col_i].on_magenta}#{board_icons[row_pair_i + 1][col_i + 1].on_grey}"
   end
 end
