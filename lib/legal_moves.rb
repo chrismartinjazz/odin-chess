@@ -42,11 +42,11 @@ module LegalMoves
   def find_moves(piece, start, active_player)
     moves = []
     # For each direction the piece can move
-    piece.step_pairs.each do |step|
+    piece.directions_of_movement.each do |direction|
       # Up to as many squares as it can travel
       (1..piece.max_move).each do |squares|
         # Locate the finishing square
-        finish_sq = [start[0] + (step[0] * squares), start[1] + (step[1] * squares)]
+        finish_sq = [start[0] + (direction[0] * squares), start[1] + (direction[1] * squares)]
         # Go to the next move direction if it is off the board
         break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 
@@ -71,11 +71,11 @@ module LegalMoves
     pawn_moves = []
     max_move = (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1) ? 2 : 1
     # For each possible movement (not capturing)
-    step = pawn.step_pair_movement
+    direction = pawn.direction_of_movement
     # Up to as many squares as it can travel
     (1..max_move).each do |squares|
       # Locate the finishing square
-      finish_sq = [start[0] + (step[0] * squares), start[1]]
+      finish_sq = [start[0] + (direction[0] * squares), start[1]]
       # Store the occupant of the finish square
       finish_occupant = @board[finish_sq[0]][finish_sq[1]]
       # If it is empty, we can move there - store it and continue.
@@ -86,8 +86,8 @@ module LegalMoves
       # Otherwise, break.
     end
     # For each possible capture
-    pawn.step_pairs_capture.each do |step|
-      finish_sq = [start[0] + step[0], start[1] + step[1]]
+    pawn.directions_of_capture.each do |direction|
+      finish_sq = [start[0] + direction[0], start[1] + direction[1]]
       # Go to the next move direction if it is off the board
       break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 

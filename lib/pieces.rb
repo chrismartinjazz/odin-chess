@@ -13,13 +13,13 @@ end
 
 # A chess pawn
 class Pawn < Pieces
-  attr_accessor :color, :step_pair_movement, :step_pairs_capture
+  attr_accessor :color, :direction_of_movement, :directions_of_capture
 
   def initialize(color)
     super()
     @color = color
-    @step_pair_movement = @color == 'W' ? [-1, 0] : [1, 0]
-    @step_pairs_capture = @color == 'W' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]
+    @direction_of_movement = @color == 'W' ? [-1, 0] : [1, 0]
+    @directions_of_capture = @color == 'W' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]
   end
 
   def to_s
@@ -29,12 +29,12 @@ end
 
 # A chess knight
 class Knight < Pieces
-  attr_accessor :color, :step_pairs, :max_move
+  attr_accessor :color, :directions_of_movement, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @step_pairs = Pieces.knight
+    @directions_of_movement = Pieces.knight
     @max_move = 1
   end
 
@@ -45,12 +45,12 @@ end
 
 # A chess rook
 class Rook < Pieces
-  attr_accessor :color, :step_pairs, :max_move
+  attr_accessor :color, :directions_of_movement, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @step_pairs = Pieces.orthogonal
+    @directions_of_movement = Pieces.orthogonal
     @max_move = 7
   end
 
@@ -61,12 +61,12 @@ end
 
 # A chess bishop
 class Bishop < Pieces
-  attr_accessor :color, :step_pairs, :max_move
+  attr_accessor :color, :directions_of_movement, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @step_pairs = Pieces.diagonal
+    @directions_of_movement = Pieces.diagonal
     @max_move = 7
   end
 
@@ -77,12 +77,12 @@ end
 
 # A chess queen
 class Queen < Pieces
-  attr_accessor :color, :step_pairs, :max_move
+  attr_accessor :color, :directions_of_movement, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @step_pairs = Pieces.diagonal + Pieces.orthogonal
+    @directions_of_movement = Pieces.diagonal + Pieces.orthogonal
     @max_move = 7
   end
 
@@ -93,12 +93,12 @@ end
 
 # A chess king
 class King < Pieces
-  attr_accessor :color, :step_pairs, :max_move
+  attr_accessor :color, :directions_of_movement, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @step_pairs = Pieces.diagonal + Pieces.orthogonal
+    @directions_of_movement = Pieces.diagonal + Pieces.orthogonal
     @max_move = 1
   end
 
