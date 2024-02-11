@@ -4,8 +4,6 @@ require 'json'
 
 # Saves and loads the game.
 class FileManager
-  def load_game(filename); end
-
   def save_file(save_data)
     files = save_file_list
     puts "\nExisting save files are listed below:\n"
@@ -38,11 +36,6 @@ class FileManager
     data.transform_keys!(&:to_sym)
   end
 
-  def ask_file_name
-    print '>> '
-    gets.chomp.strip
-  end
-
   def save_file_list
     if Dir.exist?('saves/.')
       Dir.entries('saves/.').filter { |file| !file.start_with?('.') }.map { |file_name| file_name[0..-5] }
@@ -57,5 +50,10 @@ class FileManager
 
       puts "- #{file_name}"
     end
+  end
+
+  def ask_file_name
+    print '>> '
+    gets.chomp.strip
   end
 end

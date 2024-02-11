@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require 'colorize'
-require_relative 'pieces'
-require_relative 'position_read_write'
 require_relative 'board_displayer'
 require_relative 'legal_moves'
+require_relative 'pieces'
+require_relative 'position_read_write'
 # rubocop:disable Metrics/ClassLength
 # rubocop:disable Metrics/MethodLength
 
