@@ -45,11 +45,14 @@ class Chess
   # Game play
   def game_loop
     loop do
-      legal_moves = @game_board.legal_moves(@current_player.color)
       puts update_display
+      legal_moves = @game_board.legal_moves(@current_player.color)
       move = ask_player_move(legal_moves) unless legal_moves.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
-      game_over if legal_moves.empty? || %w[draw resign].include?(move)
+      if legal_moves.empty? || %w[draw resign].include?(move)
+        game_over(move, legal_moves)
+        next
+      end
       make_move(move, legal_moves) unless %w[new save load].include?(move)
     end
   end
@@ -61,7 +64,7 @@ class Chess
       move = @current_player.ask_move(legal_moves)
       return move if %w[save load new resign draw exit].include?(move)
 
-      valid_move = @move_converter.convert(move, @current_player.color)
+      valid_move = @move_converter.alg_move_to_array(move, @current_player.color)
       accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
     end
     sleep(0.5) if @current_player.is_a?(PlayerComputer)
@@ -153,7 +156,7 @@ class Chess
 
   def handle_draw
     @move_list.push('(=)', '½–½')
-    message = 'Game drawn.'
+    'Game drawn.'
   end
 
   def handle_resign

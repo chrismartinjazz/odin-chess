@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# TODO: This should definitely be a module instead - all behaviour, no state.
+# TODO: This should definitely be a module instead - all behaviour, no state - probably two modules.
 # rubocop:disable Metrics/ClassLength
 
 # Converts move array [<piece>, <origin>, <destination>] to and from standard algebraic notation
@@ -19,29 +19,34 @@ class MoveConverter
     }
   end
 
-  def convert(move, color)
-    # First handle castling (e.g. '0-0') and strings that do not appear to attempt an algebraic move e.g. 'cat'
-    return check_castling(move, color) if check_castling(move, color)
+  # Naming is off here.
+  # Should be alg_move_to_array as the opening function and everything underneath called alg_???
 
-    return nil unless attempted_move?(move)
+  def alg_move_to_array(move, color)
+    # First handle castling (e.g. '0-0')
+    return alg_check_castling(move, color) if alg_check_castling(move, color)
 
-    # Strip non-algebraic move characters, and return nil if nothing is left (backup check for attempted move)
-    alg_move = strip_chars(move)
-    return nil if alg_move == ''
+    # Next handle strings that do not appear to attempt an algebraic move e.g. 'cat'
+    return nil unless alg_attempted_move?(move)
 
-    # Prepend P if first letter in not capitalized
+    # Strip non-algebraic move characters, and return nil if less than two characters are left
+    # (backup check for attempted move)
+    alg_move = alg_strip_chars(move)
+    return nil if alg_move.length < 2
+
+    # Prepend P if first letter is not capitalized
     alg_move.prepend('P') unless alg_move.slice(0).ord.between?(65, 90)
 
     # Check the move has valid characters in each position and is the right length.
-    return nil unless valid_move?(alg_move)
+    return nil unless alg_valid_move?(alg_move)
 
     # Move is now 3-5 characters, in format:
-    # Piece, (opt. disambiguation 1, opt. disambiguation 2), destination column, destination row
+    # Piece, (opt. disambiguation 1), (opt. disambiguation 2), destination column, destination row
     # Return it converted to an array.
-    alg_move_to_array(alg_move, color)
+    alg_to_array(alg_move, color)
   end
 
-  def check_castling(move, color)
+  def alg_check_castling(move, color)
     king_row = color == 'B' ? 0 : 7
     king_letter = color == 'B' ? 'k' : 'K'
     return [king_letter, [king_row, 4], [king_row, 6]] if %w[O-O 0-0].include?(move)
@@ -51,21 +56,22 @@ class MoveConverter
     false
   end
 
-  def attempted_move?(move)
+  def alg_attempted_move?(move)
     attempt = /^[a-hKQRBNP]{1}[a-h1-9x]{1,5}[+#?! ]*?$/
     not_end_with_x = /[^x]$/
-
-    move.match?(attempt) && move.match?(not_end_with_x)
+    # Remove spaces anywhere in the string (allow player to input spaces)
+    move_no_spaces = move.gsub(/\s+/, '')
+    move_no_spaces.match?(attempt) && move_no_spaces.match?(not_end_with_x)
   end
 
-  def strip_chars(move)
+  def alg_strip_chars(move)
     algebraic = /[a-h1-8KQRBNP]/
     alg_move = ''
     move.each_char { |char| alg_move += char if char.match?(algebraic) }
     alg_move
   end
 
-  def alg_move_to_array(alg_move, color)
+  def alg_to_array(alg_move, color)
     piece = color == 'W' ? alg_move.slice(0) : alg_move.slice(0).downcase
     origin_square = alg_move_origin_square(alg_move)
     destination_square = alg_move_destination_square(alg_move)
@@ -90,7 +96,7 @@ class MoveConverter
     [orig_row, orig_col]
   end
 
-  def valid_move?(move)
+  def alg_valid_move?(move)
     case move.length
     when 3
       move.match?(@validation_length3)
@@ -104,12 +110,16 @@ class MoveConverter
   end
 
   def array_to_alg_move(move, capture = nil, legal_moves = nil, in_check: false)
+    # Check for castling
     return array_check_castling(move) if array_check_castling(move)
 
-    return move unless move.length == 3
+    # Check that move is in the correct format
+    return move unless move.length == 3 && move[0].is_a?(String) && move[1].is_a?(Array) && move[2].is_a?(Array)
 
+    # Store the piece character capitalised.
     piece_char = move[0].upcase
 
+    # Build the algebraic move in successive elements left to right.
     piece = piece_char == 'P' ? '' : piece_char
     disambiguation = array_disambiguate_move(move, legal_moves)
     pawn_col = array_pawn_capture(move, capture, piece_char)
@@ -118,7 +128,7 @@ class MoveConverter
     pawn_prom = array_pawn_prom(move, capture, piece_char)
     check = in_check ? '+' : ''
 
-    # E.g., with dots in place of missing elements: "Qa1xa3.+", ".d.xe4..", "....e8Q."
+    # Return the formatted move with dots in place of missing elements: "Qa1xa3.+", ".d.xe4..", "....e8Q."
     "#{piece}#{disambiguation.join}#{pawn_col}#{capturing}#{destination.join}#{pawn_prom}#{check}"
   end
 

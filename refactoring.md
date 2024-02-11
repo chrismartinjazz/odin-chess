@@ -39,10 +39,16 @@
     - MoveConverter(ComputerPlayer holds onto)
 - Player includes
     - Nothing
-- Player is reponsible for
+- Player is responsible for
     - Selecting and communicating moves
 
-## MoveConverter (147)
+## MoveConverter (173)
 - MoveConverter knows
-    - Constants only - regex validations and hashes.
+    - Constants only - regex validations and hashes. It should be a module.
+- MoveConverter holds onto
+    - Nothing
+- MoveConverter includes
+    - Nothing
+- MoveConverter is responsible for
+    - Converting algebraic moves to array and vice versa
 
