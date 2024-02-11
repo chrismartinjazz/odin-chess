@@ -19,9 +19,6 @@ class MoveConverter
     }
   end
 
-  # Naming is off here.
-  # Should be alg_move_to_array as the opening function and everything underneath called alg_???
-
   def alg_move_to_array(move, color)
     # First handle castling (e.g. '0-0')
     return alg_check_castling(move, color) if alg_check_castling(move, color)

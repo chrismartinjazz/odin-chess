@@ -14,8 +14,8 @@ class FileManager
     puts "\nName your save file - 'cancel' to cancel\n"
     file_name = ask_file_name
 
-    File.open("saves/#{file_name}.txt", 'w') do |f|
-      f.puts save_data.to_json
+    File.open("saves/#{file_name}.txt", 'w') do |file|
+      file.puts save_data.to_json
     end
 
     File.exist? "saves/#{file_name}.txt"
@@ -40,7 +40,7 @@ class FileManager
 
   def ask_file_name
     print '>> '
-    file_name = gets.chomp.strip
+    gets.chomp.strip
   end
 
   def save_file_list
