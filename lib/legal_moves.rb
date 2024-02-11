@@ -4,6 +4,8 @@ require_relative 'legal_castling'
 
 # Depends on GameBoard class, specifically the @board instance variable.
 
+# rubocop:disable Metrics/MethodLength
+
 # Finds legal moves in the position.
 module LegalMoves
   include LegalCastling
@@ -34,10 +36,6 @@ module LegalMoves
       find_moves(piece, position, active_player)
     end
   end
-  # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
 
   def find_moves(piece, start, active_player)
     moves = []
@@ -107,3 +105,5 @@ module LegalMoves
     moves.push(move) unless active_player && test_for_check?(move)
   end
 end
+
+# rubocop:enable Metrics/MethodLength

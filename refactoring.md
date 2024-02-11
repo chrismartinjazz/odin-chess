@@ -1,3 +1,8 @@
+Changing the wording of 'step-pairs' to 'direction'.
+pawn.step_pair_movement -> pawn.direction_of_movement
+pawn.step_pairs_capture -> pawn.directions_of_capture
+others.step_pairs -> directions_of_movement
+
 # Structure
 
 ## Chess (278)
@@ -17,6 +22,8 @@
     - Handling the end of game / save / load options. No 'change of state'.
     - Displaying the game state. No 'change of state'.
 
+---
+
 ## GameBoard (164)
 - GameBoard knows
     - The state of the board
@@ -27,6 +34,7 @@
     - PositionReadWrite @position_read_write
     - BoardDisplayer @board_displayer
 - GameBoard includes
+    - Pieces
     - LegalMoves
 - GameBoard is responsible for
     - Moving pieces
@@ -52,3 +60,22 @@
 - MoveConverter is responsible for
     - Converting algebraic moves to array and vice versa
 
+## FileManager (61)
+- FileManager knows
+    - Nothing - it should be a module!
+- Responsible for saving and loading game data, where each game is a single hash - agnostic of what is in the hash.
+
+---
+
+### PositionReadWrite (51)
+- PositionReadWrite knows
+    - Just a constant - Piece-Map. It should be a module.
+- PositionReadWrite includes
+    - Pieces
+- Responsible for converting a text array into a GameBoard and vice versa.
+
+### BoardDisplayer (48)
+- BoardDisplayer knows, holds onto etc nothing. Should be a module.
+
+### Pieces(108)
+- Each piece knows its possible directions of movement, maximum squares to move and what color it is. No change of state.

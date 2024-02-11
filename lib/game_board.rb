@@ -6,7 +6,6 @@ require_relative 'legal_moves'
 require_relative 'pieces'
 require_relative 'position_read_write'
 # rubocop:disable Metrics/ClassLength
-# rubocop:disable Metrics/MethodLength
 
 # Holds the pieces and finds legal moves
 class GameBoard
@@ -163,4 +162,3 @@ class GameBoard
   end
 end
 # rubocop:enable Metrics/ClassLength
-# rubocop:enable Metrics/MethodLength
