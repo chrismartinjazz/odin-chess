@@ -1,7 +1,43 @@
-Changing the wording of 'step-pairs' to 'direction'.
-pawn.step_pair_movement -> pawn.direction_of_movement
-pawn.step_pairs_capture -> pawn.directions_of_capture
-others.step_pairs -> directions_of_movement
+@king_position.
+- GameBoard
+    - #initialize to nil
+    - We call find_king to update it just before in_check? in #test_for_check?, because we may have just moved the king.
+    - We call find_king to update it in #undo_move in case we have moved the king back.
+- LegalMoves
+    - We call find_king to update it at the very start of legal_moves, so it is updated prior to that chain of actions
+The reason why we have this convolution is because legal_moves is called both to find all legal moves prior to moving, and every time we test for check (most often recursively).
+However this is not necessary - to test for check it would be much more efficient to:
+
+find_king at the start of testing for legal_moves
+test_for_check?(move = nil, king_position)
+- Make the given move (nil if not given - update king_position if we just moved it)
+    - Iterate from the king position over orthogonal and diagonal directions looking for opposing pieces. Break if off the board
+    - When find a piece, check its type.
+        - knight - return true if knight && distance == 1
+        - orthogonal - return true if rook, queen, king && distance == 1
+        - diagonal - return true if bishop, queen, king && distance == 1
+        - pawn_diagonal - return true if distance == 1 (pawn has to be initialized based on color of the king)
+- Undo the move
+
+Rethinking again...
+Chess --> Board: What are the legal moves for white?
+Init a set of moves
+For every square...
+    If it contains a white piece...
+        For every direction that piece moves...
+            For every distance up to maximum...
+                Is it nil?
+                    Add it to moves and keep going
+                Is it off the board?
+                    Next direction
+                Is it occupied by black piece?
+                    Add it to moves and next direction.
+                Is it occupied by white piece?
+                    Next direction
+For every move in the set of moves...
+    (Test: if white makes this move, are they in check?)
+    Make the move on the board
+    
 
 # Structure
 
@@ -78,4 +114,11 @@ others.step_pairs -> directions_of_movement
 - BoardDisplayer knows, holds onto etc nothing. Should be a module.
 
 ### Pieces(108)
-- Each piece knows its possible directions of movement, maximum squares to move and what color it is. No change of state.
+- Each piece knows its possible directions of movement, maximum squares to move and what color it is. No change of state within a piece.
+
+### LegalMoves
+- legal_moves is called from:
+    - Chess
+        - #game_loop (for current_player)
+    - GameBoard
+        - #in_check? (in conjunction with @king_position)

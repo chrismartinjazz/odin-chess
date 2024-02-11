@@ -115,7 +115,7 @@ class GameBoard
   end
 
   ## Testing for check - this could move to a class (as king_position can change state).
-  # Has to access move_piece. Parameters move,
+  # Has to access move_piece.
   def test_for_check?(move)
     player_color = move[0].upcase == move[0] ? 'W' : 'B'
     # Make the move and test for check, storing the original occupant to undo move later.
