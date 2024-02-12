@@ -33,12 +33,12 @@ describe GameBoard do
 
   describe '#path_safe?' do
     it 'identifies that the black king is moving through check' do
-      subject.instance_variable_set(:@king_position, [0, 4])
+      subject.instance_variable_get(:@king_position)['B'] = [0, 4]
       expect(subject.path_safe?('B', 'k', 0, -1)).to be false
     end
 
     it 'identifies that the white king is initially in check' do
-      subject.instance_variable_set(:@king_position, [7, 4])
+      subject.instance_variable_get(:@king_position)['W'] = [7, 4]
       expect(subject.path_safe?('W', 'K', 7, -1)).to be false
     end
 
