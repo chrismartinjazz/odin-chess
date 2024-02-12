@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
-require_relative 'game_board'
-require_relative 'player'
-require_relative 'move_converter'
+require_relative 'convert_text_move_to_array'
+require_relative 'convert_array_to_text_move'
 require_relative 'file_manager'
+require_relative 'game_board'
 require_relative 'game_over'
+require_relative 'move_converter'
+require_relative 'player'
 require_relative 'update_display'
 
 # The main game loop
 class Chess
+  include ConvertTextMoveToArray
+  include ConvertArrayToTextMove
   include GameOver
   include UpdateDisplay
 

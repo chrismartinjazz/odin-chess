@@ -17,6 +17,15 @@
     - Handling the end of game / save / load options. No 'change of state'.
     - Displaying the game state. No 'change of state'.
 
+GameOver:
+move, legal_moves_list
+@game_board
+@current_player
+@move_list
+@initial_position
+--> include FileManager (convert this to module)
+(but for now, @file_manager)
+
 ---
 
 ## GameBoard (164)
