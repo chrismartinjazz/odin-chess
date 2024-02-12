@@ -2,7 +2,7 @@
 
 require_relative '../lib/game_board'
 require_relative '../lib/legal_moves'
-require_relative '../lib/legal_castling'
+require_relative '../lib/legal_castling_moves'
 
 describe GameBoard do
   context 'When black is blocked by own piece and check on queen side, but can castle king side'

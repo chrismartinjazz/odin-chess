@@ -3,7 +3,7 @@
 # Depends on GameBoard > LegalMoves > Castling
 
 # Checks for legal castling moves on GameBoard's board.
-module LegalCastling
+module LegalCastlingMoves
   def legal_castling_moves(board, king_position, can_castle, color)
     moves = []
     if color == 'W'
@@ -33,6 +33,8 @@ module LegalCastling
     board[king_row][4 + (direction * 1)].nil? && board[king_row][4 + (direction * 2)].nil?
   end
 
+  # TODO: once TestForCheck is a module, include into this module to extend functionality rather than
+  # calling back to it like this.
   def path_safe?(_board, color, king_char, king_row, direction)
     return false if in_check?(color) ||
                     test_for_check?([king_char, [king_row, 4], [king_row, 4 + (direction * 1)]]) ||

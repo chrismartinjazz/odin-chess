@@ -13,13 +13,14 @@ end
 
 # A chess pawn
 class Pawn < Pieces
-  attr_accessor :color, :direction_of_movement, :directions_of_capture
+  attr_accessor :color, :directions_of_movement, :directions_of_capture, :max_move
 
   def initialize(color)
     super()
     @color = color
-    @direction_of_movement = @color == 'W' ? [-1, 0] : [1, 0]
+    @directions_of_movement = @color == 'W' ? [[-1, 0]] : [[1, 0]]
     @directions_of_capture = @color == 'W' ? [[-1, 1], [-1, -1]] : [[1, 1], [1, -1]]
+    @max_move = 1
   end
 
   def to_s

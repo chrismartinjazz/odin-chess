@@ -46,7 +46,7 @@ class Chess
   def game_loop
     loop do
       puts update_display
-      legal_moves_list = @game_board.legal_moves(@current_player.color)
+      legal_moves_list = @game_board.find_legal_moves(@current_player.color)
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
       if legal_moves_list.empty? || %w[draw resign].include?(move)
