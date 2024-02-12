@@ -46,36 +46,36 @@ class Chess
   def game_loop
     loop do
       puts update_display
-      legal_moves = @game_board.legal_moves(@current_player.color)
-      move = ask_player_move(legal_moves) unless legal_moves.empty?
+      legal_moves_list = @game_board.legal_moves(@current_player.color)
+      move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
-      if legal_moves.empty? || %w[draw resign].include?(move)
-        game_over(move, legal_moves)
+      if legal_moves_list.empty? || %w[draw resign].include?(move)
+        game_over(move, legal_moves_list)
         next
       end
-      make_move(move, legal_moves) unless %w[new save load].include?(move)
+      make_move(move, legal_moves_list) unless %w[new save load].include?(move)
     end
   end
 
   # Game play
-  def ask_player_move(legal_moves)
+  def ask_player_move(legal_moves_list)
     accepted_move = false
     until accepted_move
-      move = @current_player.ask_move(legal_moves)
+      move = @current_player.ask_move(legal_moves_list)
       return move if %w[save load new resign draw exit].include?(move)
 
       valid_move = @move_converter.alg_move_to_array(move, @current_player.color)
-      accepted_move = in_legal_moves(valid_move, legal_moves) if valid_move
+      accepted_move = in_legal_moves(valid_move, legal_moves_list) if valid_move
     end
     sleep(0.5) if @current_player.is_a?(PlayerComputer)
     accepted_move
   end
 
   # Game play
-  def make_move(move, legal_moves)
+  def make_move(move, legal_moves_list)
     promotion_piece = @current_player.ask_promotion_piece if pawn_promoting?(move)
     capture = @game_board.move_piece(move, promotion_piece)
-    @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves,
+    @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves_list,
                                                     in_check: @game_board.in_check?(@current_player.color))
     next_player
   end
@@ -93,8 +93,8 @@ class Chess
   # MoveConverter just knows how to convert algebraic notation to a move and vice versa.
   # I guess it could be given legal_moves as an optional parameter? Possible.
   # Currently this is the 'part' of the move analysis that links together the legal_moves and the move_converter.
-  def in_legal_moves(move, legal_moves)
-    matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
+  def in_legal_moves(move, legal_moves_list)
+    matches = legal_moves_list.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
     case matches.length
     when 0
       false
@@ -128,11 +128,11 @@ class Chess
   end
 
   # Handle game end/save/load/game over
-  def game_over(move, legal_moves)
+  def game_over(move, legal_moves_list)
     player_in_check = @game_board.in_check?(@current_player.color)
-    if legal_moves.empty? && player_in_check
+    if legal_moves_list.empty? && player_in_check
       message = handle_checkmate
-    elsif legal_moves.empty? && !player_in_check
+    elsif legal_moves_list.empty? && !player_in_check
       message = handle_stalemate
     elsif move == 'draw'
       message = handle_draw

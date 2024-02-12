@@ -22,7 +22,6 @@ class GameBoard
       b_king_side: true, b_queen_side: true
     }
     @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
-    # @king_position = nil
     @en_passant_option = nil
   end
 
@@ -135,7 +134,7 @@ class GameBoard
     return false if @king_position[color].nil?
 
     opponent_color = color == 'W' ? 'B' : 'W'
-    opponent_legal_moves = legal_moves(opponent_color, active_player: false)
+    opponent_legal_moves = find_legal_moves(opponent_color, active_player: false)
     opponent_legal_moves.each do |move|
       return true if move[2] == @king_position[color]
     end
@@ -164,6 +163,11 @@ class GameBoard
 
   def write_position
     @position_read_write.write_position(@board)
+  end
+
+  # Calls module LegalMoves
+  def find_legal_moves(color, active_player: true)
+    legal_moves(@board, @king_position, @can_castle, color, active_player:)
   end
 end
 # rubocop:enable Metrics/ClassLength

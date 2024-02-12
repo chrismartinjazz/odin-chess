@@ -48,13 +48,13 @@ describe GameBoard do
       end
     end
 
-    describe '#legal_moves' do
+    describe '#find_legal_moves' do
       it 'returns the legal moves of the knight' do
         game_board_knight.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
-        expect(game_board_knight.legal_moves('W')).to eq([
-                                                           ['N', [7, 0], [5, 1]],
-                                                           ['N', [7, 0], [6, 2]]
-                                                         ])
+        expect(game_board_knight.find_legal_moves('W')).to eq([
+                                                                ['N', [7, 0], [5, 1]],
+                                                                ['N', [7, 0], [6, 2]]
+                                                              ])
       end
     end
 
@@ -91,18 +91,18 @@ describe GameBoard do
 
     it 'returns the legal moves of the white knight' do
       game_board_two_knights.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
-      expect(game_board_two_knights.legal_moves('W')).to eq([
-                                                              ['N', [7, 0], [5, 1]],
-                                                              ['N', [7, 0], [6, 2]]
-                                                            ])
+      expect(game_board_two_knights.find_legal_moves('W')).to eq([
+                                                                   ['N', [7, 0], [5, 1]],
+                                                                   ['N', [7, 0], [6, 2]]
+                                                                 ])
     end
 
     it 'returns the legal moves of the black knight' do
       game_board_two_knights.instance_variable_set(:@can_castle, { b_king_side: false, b_queen_side: false })
-      expect(game_board_two_knights.legal_moves('B')).to eq([
-                                                              ['n', [0, 0], [1, 2]],
-                                                              ['n', [0, 0], [2, 1]]
-                                                            ])
+      expect(game_board_two_knights.find_legal_moves('B')).to eq([
+                                                                   ['n', [0, 0], [1, 2]],
+                                                                   ['n', [0, 0], [2, 1]]
+                                                                 ])
     end
   end
 
@@ -153,7 +153,7 @@ describe GameBoard do
 
     it 'finds the legal moves for the white pawns' do
       game_board_four_pawns.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
-      expect(game_board_four_pawns.legal_moves('W')).to eql(
+      expect(game_board_four_pawns.find_legal_moves('W')).to eql(
         [
           ['P', [4, 0], [3, 0]],
           ['P', [6, 0], [5, 0]],
@@ -164,12 +164,12 @@ describe GameBoard do
 
     it 'finds the legal moves for the black pawns' do
       game_board_four_pawns.instance_variable_set(:@can_castle, { b_king_side: false, b_queen_side: false })
-      expect(game_board_four_pawns.legal_moves('B')).to eql([
-                                                              ['p', [1, 0], [2, 0]],
-                                                              ['p', [1, 0], [3, 0]],
-                                                              ['p', [5, 1], [6, 1]],
-                                                              ['p', [5, 1], [6, 0]]
-                                                            ])
+      expect(game_board_four_pawns.find_legal_moves('B')).to eql([
+                                                                   ['p', [1, 0], [2, 0]],
+                                                                   ['p', [1, 0], [3, 0]],
+                                                                   ['p', [5, 1], [6, 1]],
+                                                                   ['p', [5, 1], [6, 0]]
+                                                                 ])
     end
   end
 
@@ -203,10 +203,10 @@ describe GameBoard do
       it 'removes moves that are in check' do
         game_board_in_check.instance_variable_get(:@can_castle)[:b_king_side] = false
         game_board_in_check.instance_variable_get(:@can_castle)[:b_queen_side] = false
-        expect(game_board_in_check.legal_moves('B')).to eql([
-                                                              ['k', [0, 0], [1, 1]],
-                                                              ['k', [0, 0], [0, 1]]
-                                                            ])
+        expect(game_board_in_check.find_legal_moves('B')).to eql([
+                                                                   ['k', [0, 0], [1, 1]],
+                                                                   ['k', [0, 0], [0, 1]]
+                                                                 ])
       end
     end
   end
@@ -225,8 +225,8 @@ describe GameBoard do
 
   context 'when castling is possible king side' do
     it 'identifies castling moves for black and white king' do
-      expect(game_board_castling.legal_moves('B')).to include(['k', [0, 4], [0, 6]])
-      expect(game_board_castling.legal_moves('W')).to include(['K', [7, 4], [7, 6]])
+      expect(game_board_castling.find_legal_moves('B')).to include(['k', [0, 4], [0, 6]])
+      expect(game_board_castling.find_legal_moves('W')).to include(['K', [7, 4], [7, 6]])
     end
   end
 
@@ -357,13 +357,13 @@ describe GameBoard do
       end
     end
 
-    describe '#legal_moves' do
+    describe '#find_legal_moves' do
       it 'identifies en_passant capture as a legal move' do
         move = ['p', [1, 0], [3, 0]]
         board_en_passant.instance_variable_set(:@can_castle, { w_king_side: false, w_queen_side: false })
 
         board_en_passant.pawn_two_square_advance(move)
-        expect(board_en_passant.legal_moves('W')).to eql(
+        expect(board_en_passant.find_legal_moves('W')).to eql(
           [
             ['P', [3, 1], [2, 1]],
             ['P', [3, 1], [2, 0]]

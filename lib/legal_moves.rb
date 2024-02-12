@@ -2,7 +2,7 @@
 
 require_relative 'legal_castling'
 
-# Depends on GameBoard class, specifically the @board instance variable.
+# Depends on GameBoard class, specifically the board instance variable.
 
 # rubocop:disable Metrics/MethodLength
 
@@ -10,28 +10,26 @@ require_relative 'legal_castling'
 module LegalMoves
   include LegalCastling
 
-  def legal_moves(color, active_player: true)
-    # @king_position[color] = find_king(color) if active_player
-    legal_moves = []
+  def legal_moves(board, king_position, can_castle, color, active_player: true)
+    legal_moves_list = []
 
     (0..7).each do |row_i|
       (0..7).each do |col_i|
-        next if @board[row_i][col_i].nil?
+        next if board[row_i][col_i].nil?
 
-        next unless @board[row_i][col_i].color == color
+        next unless board[row_i][col_i].color == color
 
-        piece = @board[row_i][col_i]
-        legal_moves += find_moves_for_piece(piece, [row_i, col_i], active_player)
+        piece = board[row_i][col_i]
+        legal_moves_list += find_moves_for_piece(piece, [row_i, col_i], active_player)
       end
     end
-    legal_moves += legal_castling_moves(color) if active_player
-    legal_moves
+    legal_moves_list += legal_castling_moves(board, king_position, can_castle, color) if active_player
+    legal_moves_list
   end
 
   def find_moves_for_piece(piece, position, active_player)
     if piece.is_a?(Pawn)
-      find_pawn_moves(piece, position,
-                      active_player)
+      find_pawn_moves(piece, position, active_player)
     else
       find_moves(piece, position, active_player)
     end
@@ -49,7 +47,7 @@ module LegalMoves
         break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
 
         # Store the occupant of the finish square
-        finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+        finish_occupant = board[finish_sq[0]][finish_sq[1]]
         # If it is empty, we can move there - store it and continue.
         if finish_occupant.nil?
           add_move(moves, piece, start, finish_sq, active_player)
@@ -75,7 +73,7 @@ module LegalMoves
       # Locate the finishing square
       finish_sq = [start[0] + (direction[0] * squares), start[1]]
       # Store the occupant of the finish square
-      finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+      finish_occupant = board[finish_sq[0]][finish_sq[1]]
       # If it is empty, we can move there - store it and continue.
       break unless finish_occupant.nil?
 
@@ -91,7 +89,7 @@ module LegalMoves
 
       # Store the occupant of the finish square.
       # Go to next move direction unless it is an opposing piece or en_passant_option.
-      finish_occupant = @board[finish_sq[0]][finish_sq[1]]
+      finish_occupant = board[finish_sq[0]][finish_sq[1]]
       next if (finish_occupant.nil? || finish_occupant.color == pawn.color) && (finish_sq != @en_passant_option)
 
       # If it is occupied by an opposing piece, or an en_passant_option we can capture it, add to legal moves
