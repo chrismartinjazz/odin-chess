@@ -20,41 +20,38 @@ module LegalMoves
         next unless board[row_i][col_i].color == color
 
         piece = board[row_i][col_i]
-        legal_moves_list += find_moves_for_piece(piece, [row_i, col_i], active_player)
+        origin = [[row_i], [col_i]]
+        legal_moves_list += find_moves_for_piece(board, piece, origin, active_player)
       end
     end
     legal_moves_list += legal_castling_moves(board, king_position, can_castle, color) if active_player
     legal_moves_list
   end
 
-  def find_moves_for_piece(piece, position, active_player)
+  def find_moves_for_piece(board, piece, origin, active_player)
     if piece.is_a?(Pawn)
-      find_pawn_moves(piece, position, active_player)
+      find_pawn_moves(board, piece, origin,
+                      active_player)
     else
-      find_moves(piece, position, active_player)
+      find_moves(board, piece, origin, active_player)
     end
   end
 
-  def find_moves(piece, start, active_player)
+  def find_moves(board, piece, origin, active_player)
     moves = []
-    # For each direction the piece can move
     piece.directions_of_movement.each do |direction|
-      # Up to as many squares as it can travel
       (1..piece.max_move).each do |squares|
-        # Locate the finishing square
-        finish_sq = [start[0] + (direction[0] * squares), start[1] + (direction[1] * squares)]
-        # Go to the next move direction if it is off the board
-        break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
+        destination = locate_destination_square(origin, direction, squares)
+        break unless destination_on_board?(destination)
 
-        # Store the occupant of the finish square
-        finish_occupant = board[finish_sq[0]][finish_sq[1]]
+        destination_sq_occupant = board[destination[0]][destination[1]]
         # If it is empty, we can move there - store it and continue.
-        if finish_occupant.nil?
-          add_move(moves, piece, start, finish_sq, active_player)
+        if destination_sq_occupant.nil?
+          add_move(moves, piece, origin, destination, active_player)
           next
         end
         # If it is occupied by an opposing piece, we can capture it, add to legal moves
-        add_move(moves, piece, start, finish_sq, active_player) if finish_occupant.color != piece.color
+        add_move(moves, piece, origin, destination, active_player) if destination_sq_occupant.color != piece.color
         # If we have reached this line, we have either stored the capture move, or
         # we are looking at a piece of our own color - so go to the next move direction.
         break
@@ -63,43 +60,54 @@ module LegalMoves
     moves
   end
 
-  def find_pawn_moves(pawn, start, active_player)
+  def find_pawn_moves(pawn, origin, active_player)
     pawn_moves = []
-    max_move = (pawn.color == 'W' && start[0] == 6) || (pawn.color == 'B' && start[0] == 1) ? 2 : 1
-    # For each possible movement (not capturing)
+    # vertical_pawn_moves
+    max_move = pawn_on_home_row?(pawn, origin) ? 2 : 1
     direction = pawn.direction_of_movement
-    # Up to as many squares as it can travel
     (1..max_move).each do |squares|
-      # Locate the finishing square
-      finish_sq = [start[0] + (direction[0] * squares), start[1]]
-      # Store the occupant of the finish square
-      finish_occupant = board[finish_sq[0]][finish_sq[1]]
+      destination = locate_destination_square(origin, direction, squares)
+      destination_sq_occupant = board[destination[0]][destination[1]]
       # If it is empty, we can move there - store it and continue.
-      break unless finish_occupant.nil?
+      break unless destination_sq_occupant.nil?
 
-      add_move(pawn_moves, pawn, start, finish_sq, active_player)
+      add_move(pawn_moves, pawn, origin, destination, active_player)
       next
       # Otherwise, break.
     end
-    # For each possible capture
+    # capturing_pawn_moves
     pawn.directions_of_capture.each do |direction|
-      finish_sq = [start[0] + direction[0], start[1] + direction[1]]
+      destination = [origin[0] + direction[0], origin[1] + direction[1]]
       # Go to the next move direction if it is off the board
-      break unless finish_sq[0].between?(0, 7) && finish_sq[1].between?(0, 7)
+      break unless destination[0].between?(0, 7) && destination[1].between?(0, 7)
 
-      # Store the occupant of the finish square.
+      # Store the occupant of the destination square.
       # Go to next move direction unless it is an opposing piece or en_passant_option.
-      finish_occupant = board[finish_sq[0]][finish_sq[1]]
-      next if (finish_occupant.nil? || finish_occupant.color == pawn.color) && (finish_sq != @en_passant_option)
+      destination_sq_occupant = board[destination[0]][destination[1]]
+      if (destination_sq_occupant.nil? || destination_sq_occupant.color == pawn.color) && (destination != @en_passant_option)
+        next
+      end
 
       # If it is occupied by an opposing piece, or an en_passant_option we can capture it, add to legal moves
-      add_move(pawn_moves, pawn, start, finish_sq, active_player)
+      add_move(pawn_moves, pawn, origin, destination, active_player)
     end
     pawn_moves
   end
 
-  def add_move(moves, piece, start, finish_sq, active_player)
-    move = [piece.to_s, start, finish_sq]
+  def locate_destination_square(origin, direction, squares)
+    [origin[0] + (direction[0] * squares), origin[1] + (direction[1] * squares)]
+  end
+
+  def destination_on_board?(destination)
+    destination[0].between?(0, 7) && destination[1].between?(0, 7)
+  end
+
+  def pawn_on_home_row?(pawn, origin)
+    (pawn.color == 'W' && origin[0] == 6) || (pawn.color == 'B' && origin[0] == 1)
+  end
+
+  def add_move(moves, piece, origin, destination, active_player)
+    move = [piece.to_s, origin, destination]
     moves.push(move) unless active_player && test_for_check?(move)
   end
 end

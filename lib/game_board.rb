@@ -6,6 +6,7 @@ require_relative 'legal_moves'
 require_relative 'pieces'
 require_relative 'position_read_write'
 # rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/MethodLength
 
 # Holds the pieces and finds legal moves
 class GameBoard
@@ -30,7 +31,7 @@ class GameBoard
   def move_piece(move, promotion_piece = nil, testing_for_check: false)
     destination_square_occupant = make_move(move[1], move[2])
     update_king_position(move) if move[0].upcase == 'K'
-    if testing_for_check == false
+    unless testing_for_check
       castle(move) if castling?(move)
       update_can_castle(move[1])
       promote_pawn(move, promotion_piece) if promotion_piece
