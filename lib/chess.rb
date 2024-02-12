@@ -4,10 +4,13 @@ require_relative 'game_board'
 require_relative 'player'
 require_relative 'move_converter'
 require_relative 'file_manager'
+require_relative 'update_display'
 # rubocop:disable Metrics/ClassLength
 
 # The main game loop
 class Chess
+  include UpdateDisplay
+
   attr_reader :move_list
 
   def initialize(position = nil, player1 = nil, player2 = nil)
@@ -30,22 +33,20 @@ class Chess
     @file_manager = FileManager.new
   end
 
-  # Initialization
   def ask_player_type(color)
     puts "\n#{color} player is (h)uman or (c)omputer:"
     valid_input = nil
     until valid_input
       print '>> '
       input = gets.chomp.strip.downcase.slice(0)
-      valid_input = input if %w[h c].include?(input)
+      valid_input = input if %w[h c human computer].include?(input)
     end
-    input == 'c' ? PlayerComputer.new(color.slice(0)) : PlayerHuman.new(color.slice(0))
+    input.slice(0) == 'c' ? PlayerComputer.new(color.slice(0)) : PlayerHuman.new(color.slice(0))
   end
 
-  # Game play
   def game_loop
     loop do
-      puts update_display
+      puts update_display(@current_player, @move_list, @game_board)
       legal_moves_list = @game_board.find_legal_moves(@current_player.color)
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
@@ -57,7 +58,6 @@ class Chess
     end
   end
 
-  # Game play
   def ask_player_move(legal_moves_list)
     accepted_move = false
     until accepted_move
@@ -71,7 +71,6 @@ class Chess
     accepted_move
   end
 
-  # Game play
   def make_move(move, legal_moves_list)
     promotion_piece = @current_player.ask_promotion_piece if pawn_promoting?(move)
     capture = @game_board.move_piece(move, promotion_piece)
@@ -84,7 +83,6 @@ class Chess
     move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
   end
 
-  # Game play
   def next_player
     @current_player = @current_player == @player1 ? @player2 : @player1
   end
@@ -139,7 +137,7 @@ class Chess
     elsif move == 'resign'
       message = handle_resign
     end
-    puts update_display
+    puts update_display(@current_player, @move_list, @game_board)
     puts message
     new_save_load_exit(ask_game_over_action)
   end
@@ -185,80 +183,16 @@ class Chess
     when 'load'
       load_game
     when 'exit'
-      puts display_move_list
       system(exit)
     end
   end
 
-  # ===========================MOVE TO DISPLAY MODULE?
-  # Display the board etc.
-  def update_display
-    clear_screen
-    "#{display_title}#{display_current_player}#{@game_board.display}#{display_move_list}\n"
-  end
-
-  def clear_screen(testing: false)
-    return if testing == true
-
-    Gem.win_platform? ? (system 'cls') : (system 'clear')
-  end
-
-  # Display
-  def display_title
-    <<~HEREDOC
-        ___ _    ___      _
-       / __| |  |_ _|  __| |_  ___ ______
-      | (__| |__ | |  / _| ' \\/ -_|_-<_-<
-       \\___|____|___| \\__|_||_\\___/__/__/
-
-         use algebraic notation to move
-
-         options (type in lower case)
-         save : load : new : resign : draw : exit
-
-    HEREDOC
-  end
-
-  # Display
-  def display_current_player
-    <<~HEREDOC
-      #{@current_player.color == 'W' ? '>> White <<' : '   White'}
-      #{@current_player.color == 'B' ? '>> Black <<' : '   Black'}
-
-    HEREDOC
-  end
-
-  def display_move_list
-    game_result = move_list.pop if %w[1-0 0-1 ½–½].include?(move_list[-1])
-    win_condition = move_list.pop if %w[# stalemate (=) resigns].include?(move_list[-1])
-    collated_move_list = collate_move_list
-    "\n#{collated_move_list}#{win_condition} #{game_result}\n"
-  end
-
-  def collate_move_list
-    display = ''
-    move_list.compact!
-    move_list.push(nil) if move_list.length.odd?
-    return display if move_list.empty?
-
-    (0..move_list.length - 2).step(2) do |pair_index|
-      display += collate_move_pair(pair_index)
-    end
-    display
-  end
-
-  def collate_move_pair(pair_index)
-    "#{(pair_index + 2) / 2}. #{move_list[pair_index]} #{move_list[pair_index + 1]} "
-  end
-
-  # ==================================================MOVE TO SAVE GAME MODULE
-  # Saving and loading of the game - needs to be elsewhere.
-  def game_state
-    {
-      current_player_color: @current_player.color,
-      move_list: @move_list,
-      position: @game_board.write_position
-    }
+  def new_game(game_data = { current_player_color: 'W',
+                             move_list: [],
+                             position: @initial_position })
+    @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
+    @move_list = game_data[:move_list]
+    @game_board = GameBoard.new(game_data[:position])
   end
 
   def save_game(game_state)
@@ -268,17 +202,17 @@ class Chess
     nil
   end
 
+  def game_state
+    {
+      current_player_color: @current_player.color,
+      move_list: @move_list,
+      position: @game_board.write_position
+    }
+  end
+
   def load_game
     game_data = @file_manager.load_file
     new_game(game_data)
-  end
-
-  def new_game(game_data = { current_player_color: 'W',
-                             move_list: [],
-                             position: @initial_position })
-    @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
-    @move_list = game_data[:move_list]
-    @game_board = GameBoard.new(game_data[:position])
   end
 end
 

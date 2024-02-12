@@ -101,6 +101,8 @@ module LegalMoves
 
   def add_move(moves, piece, origin, destination, active_player)
     move = [piece.to_s, origin, destination]
+    # TODO: once TestForCheck is a module, include into this module to extend functionality rather than
+    # calling back to it like this.
     moves.push(move) unless active_player && test_for_check?(move)
   end
 end
