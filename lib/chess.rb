@@ -4,11 +4,12 @@ require_relative 'game_board'
 require_relative 'player'
 require_relative 'move_converter'
 require_relative 'file_manager'
+require_relative 'game_over'
 require_relative 'update_display'
-# rubocop:disable Metrics/ClassLength
 
 # The main game loop
 class Chess
+  include GameOver
   include UpdateDisplay
 
   attr_reader :move_list
@@ -51,6 +52,7 @@ class Chess
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
       if legal_moves_list.empty? || %w[draw resign].include?(move)
+        puts update_display(@current_player, @move_list, @game_board)
         game_over(move, legal_moves_list)
         next
       end
@@ -124,96 +126,4 @@ class Chess
     matching_col = matches.select { |match| match[1][1] == move[1][1] }
     matching_col[0] if matching_col.size == 1
   end
-
-  # Handle game end/save/load/game over
-  def game_over(move, legal_moves_list)
-    player_in_check = @game_board.in_check?(@current_player.color)
-    if legal_moves_list.empty? && player_in_check
-      message = handle_checkmate
-    elsif legal_moves_list.empty? && !player_in_check
-      message = handle_stalemate
-    elsif move == 'draw'
-      message = handle_draw
-    elsif move == 'resign'
-      message = handle_resign
-    end
-    puts update_display(@current_player, @move_list, @game_board)
-    puts message
-    new_save_load_exit(ask_game_over_action)
-  end
-
-  def handle_checkmate
-    @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
-    "#{@current_player.color == 'W' ? 'Black' : 'White'} wins by checkmate.\n\n"
-  end
-
-  def handle_stalemate
-    @move_list.push('stalemate', '½–½')
-    "#{@current_player.color == 'W' ? 'White' : 'Black'} is stalemated.\n\n"
-  end
-
-  def handle_draw
-    @move_list.push('(=)', '½–½')
-    'Game drawn.'
-  end
-
-  def handle_resign
-    @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
-    "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns.\n\n"
-  end
-
-  def ask_game_over_action
-    action = nil
-    puts 'new : load : exit ?'
-    until action
-      print '>> '
-      input = gets.chomp.strip.downcase
-      action = input if %w[new load exit].include?(input)
-    end
-    action
-  end
-
-  # Handle game save/load/game over
-  def new_save_load_exit(action)
-    case action
-    when 'new'
-      new_game
-    when 'save'
-      save_game(game_state)
-    when 'load'
-      load_game
-    when 'exit'
-      system(exit)
-    end
-  end
-
-  def new_game(game_data = { current_player_color: 'W',
-                             move_list: [],
-                             position: @initial_position })
-    @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
-    @move_list = game_data[:move_list]
-    @game_board = GameBoard.new(game_data[:position])
-  end
-
-  def save_game(game_state)
-    puts @file_manager.save_file(game_state) ? "\nSave successful" : "\nFile not saved"
-    puts 'Press Enter to continue'
-    gets
-    nil
-  end
-
-  def game_state
-    {
-      current_player_color: @current_player.color,
-      move_list: @move_list,
-      position: @game_board.write_position
-    }
-  end
-
-  def load_game
-    game_data = @file_manager.load_file
-    new_game(game_data)
-  end
 end
-
-# rubocop:enable Metrics/ClassLength
