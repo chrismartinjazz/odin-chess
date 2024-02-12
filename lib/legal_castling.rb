@@ -18,7 +18,7 @@ module LegalCastling
   end
 
   def check_castling(color, king_char, king_row, direction)
-    @king_position = [king_row, 4]
+    @king_position[color] = [king_row, 4]
     return nil unless path_clear?(king_row, direction)
 
     return nil unless path_safe?(color, king_char, king_row, direction)

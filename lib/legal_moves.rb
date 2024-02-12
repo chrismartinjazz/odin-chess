@@ -11,7 +11,7 @@ module LegalMoves
   include LegalCastling
 
   def legal_moves(color, active_player: true)
-    @king_position = find_king(color) if active_player
+    # @king_position[color] = find_king(color) if active_player
     legal_moves = []
 
     (0..7).each do |row_i|

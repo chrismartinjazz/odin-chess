@@ -21,7 +21,8 @@ class GameBoard
       w_king_side: true, w_queen_side: true,
       b_king_side: true, b_queen_side: true
     }
-    @king_position = nil
+    @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
+    # @king_position = nil
     @en_passant_option = nil
   end
 
@@ -29,6 +30,7 @@ class GameBoard
   # A move is array in format [<piece>, <origin>, <destination>]
   def move_piece(move, promotion_piece = nil, testing_for_check: false)
     destination_square_occupant = make_move(move[1], move[2])
+    update_king_position(move) if move[0].upcase == 'K'
     if testing_for_check == false
       castle(move) if castling?(move)
       update_can_castle(move[1])
@@ -45,6 +47,10 @@ class GameBoard
     @board[destination[0]][destination[1]] = @board[origin[0]][origin[1]]
     @board[origin[0]][origin[1]] = nil
     destination_square_occupant
+  end
+
+  def update_king_position(move)
+    move[0] == 'K' ? @king_position['W'] = move[2] : @king_position['B'] = move[2]
   end
 
   ## Handling specific moves
@@ -120,26 +126,25 @@ class GameBoard
     player_color = move[0].upcase == move[0] ? 'W' : 'B'
     # Make the move and test for check, storing the original occupant to undo move later.
     original_occupant = move_piece(move, testing_for_check: true)
-    @king_position = find_king(player_color) if move[0].upcase == 'K'
     in_check = in_check?(player_color)
     undo_move(player_color, move, original_occupant)
     in_check
   end
 
   def in_check?(color)
-    return false if @king_position.nil?
+    return false if @king_position[color].nil?
 
     opponent_color = color == 'W' ? 'B' : 'W'
     opponent_legal_moves = legal_moves(opponent_color, active_player: false)
     opponent_legal_moves.each do |move|
-      return true if move[2] == @king_position
+      return true if move[2] == @king_position[color]
     end
     false
   end
 
-  def undo_move(player_color, move, original_occupant)
+  def undo_move(_player_color, move, original_occupant)
     move_piece([move[0], move[2], move[1]], testing_for_check: true)
-    @king_position = find_king(player_color) if move[0].upcase == 'K'
+    # @king_position[player_color] = find_king(player_color) if move[0].upcase == 'K'
     @board[move[2][0]][move[2][1]] = original_occupant
   end
 

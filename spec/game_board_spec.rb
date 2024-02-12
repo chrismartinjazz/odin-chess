@@ -194,13 +194,15 @@ describe GameBoard do
 
     describe '#in_check?' do
       it 'identifies that black is in check on their move' do
-        game_board_in_check.instance_variable_set(:@king_position, [0, 0])
+        game_board_in_check.instance_variable_get(:@king_position)['B'] = [0, 0]
         expect(game_board_in_check.in_check?('B')).to be true
       end
     end
 
     describe '#avoid_moving_into_check' do
       it 'removes moves that are in check' do
+        game_board_in_check.instance_variable_get(:@can_castle)[:b_king_side] = false
+        game_board_in_check.instance_variable_get(:@can_castle)[:b_queen_side] = false
         expect(game_board_in_check.legal_moves('B')).to eql([
                                                               ['k', [0, 0], [1, 1]],
                                                               ['k', [0, 0], [0, 1]]
