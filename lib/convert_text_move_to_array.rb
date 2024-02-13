@@ -13,7 +13,7 @@ module ConvertTextMoveToArray
   MAP_ROW = { nil => nil, '8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7 }.freeze
   MAP_COL = { nil => nil, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7 }.freeze
 
-  def convert_text_move_to_array(move, color, _legal_moves)
+  def convert_text_move_to_array(move, color, legal_moves)
     return castling(move, color) if castling(move, color)
 
     return nil unless attempted_move?(move)
@@ -29,6 +29,8 @@ module ConvertTextMoveToArray
 
     move_array
   end
+
+  private
 
   def castling(move, color)
     king_row = color == 'W' ? 7 : 0

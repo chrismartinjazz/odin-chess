@@ -38,7 +38,8 @@ class PlayerComputer < Player
   end
 
   def ask_move(legal_moves = nil)
-    @move_converter.array_to_alg_move(legal_moves.sample)
+    @move_converter.convert_array_to_text(legal_moves.sample)
+    # @move_converter.array_to_alg_move(legal_moves.sample)
   end
 
   def ask_promotion_piece

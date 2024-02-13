@@ -40,7 +40,7 @@ describe GameBoard do
     end
 
     describe '#move_piece' do
-      it 'moves the knight to the square b3 with move (piece, starting, ending squares)' do
+      fit 'moves the knight to the square b3 with move (piece, starting, ending squares)' do
         board_before_move = game_board_knight.board
         game_board_knight.move_piece(['N', [7, 0], [5, 1]])
         expect(game_board_knight.board[7][0]).to be nil

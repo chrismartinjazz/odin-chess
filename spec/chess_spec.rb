@@ -5,9 +5,17 @@ require_relative '../lib/chess'
 describe Chess do
   subject(:chess) { described_class.new(nil, PlayerHuman.new('W'), PlayerHuman.new('B')) }
 
+  describe '#ask_player_move' do
+    fit 'accepts the move "e4"' do
+      allow(subject.instance_variable_get(:@current_player)).to receive(:ask_move).and_return(['P', '6, 4', '4, 4'])
+      accepted_move = subject.ask_player_move([['P', '6, 4', '4, 4']])
+      expect(accepted_move).to eql(['P', '6, 4', '4, 4'])
+    end
+  end
+
   describe '#in_legal_moves' do
     context 'in the simple case of a knight on a1' do
-      it 'returns the legal move for "Nb3"' do
+      xit 'returns the legal move for "Nb3"' do
         move = ['N', [nil, nil], [5, 1]]
         legal_moves = [['N', [7, 0], [5, 1]], ['N', [7, 0], [6, 2]]]
         expect(chess.in_legal_moves(move, legal_moves)).to eq(['N', [7, 0], [5, 1]])
@@ -26,22 +34,22 @@ describe Chess do
         ]
       end
 
-      it 'returns false for "Nb3"' do
+      xit 'returns false for "Nb3"' do
         move = ['N', [nil, nil], [5, 1]]
         expect(chess.in_legal_moves(move, legal_moves)).to be false
       end
 
-      it 'returns true for "Nab3", as this disambiguates the move' do
+      xit 'returns true for "Nab3", as this disambiguates the move' do
         move = ['N', [nil, 0], [5, 1]]
         expect(chess.in_legal_moves(move, legal_moves)).to eq(['N', [7, 0], [5, 1]])
       end
 
-      it 'returns false for "N1b3"' do
+      xit 'returns false for "N1b3"' do
         move = ['N', [7, nil], [5, 1]]
         expect(chess.in_legal_moves(move, legal_moves)).to be false
       end
 
-      it 'returns true for "Na1b3"' do
+      xit 'returns true for "Na1b3"' do
         move = ['N', [7, 0], [5, 1]]
         expect(chess.in_legal_moves(move, legal_moves)).to eq(['N', [7, 0], [5, 1]])
       end

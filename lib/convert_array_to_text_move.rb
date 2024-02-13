@@ -31,6 +31,8 @@ module ConvertArrayToTextMove
     "#{piece}#{disambiguation.join}#{pawn_col}#{capturing}#{destination.join}#{pawn_prom}#{check}"
   end
 
+  private
+
   def castling(move)
     MAP_CASTLING[move] if MAP_CASTLING.include?(move)
   end
