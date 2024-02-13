@@ -13,7 +13,7 @@ module ConvertTextMoveToArray
   MAP_ROW = { nil => nil, '8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7 }.freeze
   MAP_COL = { nil => nil, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7 }.freeze
 
-  def convert_text_move_to_array(move, color)
+  def convert_text_move_to_array(move, color, _legal_moves)
     return castling(move, color) if castling(move, color)
 
     return nil unless attempted_move?(move)
@@ -24,7 +24,10 @@ module ConvertTextMoveToArray
 
     # Move is now 3-5 characters, in format:
     # Piece, (opt. disambiguation 1), (opt. disambiguation 2), destination column, destination row
-    convert_to_array(stripped_move, color)
+    move_array = convert_to_array(stripped_move, color)
+    nil unless in_legal_moves(move_array, legal_moves)
+
+    move_array
   end
 
   def castling(move, color)
@@ -84,5 +87,39 @@ module ConvertTextMoveToArray
     dest_row = MAP_ROW[stripped_move.slice(-1)]
     dest_col = MAP_COL[stripped_move.slice(-2)]
     [dest_row, dest_col]
+  end
+
+  def in_legal_moves(move, legal_moves)
+    matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
+    case matches.length
+    when 0
+      false
+    when 1
+      matches[0]
+    else
+      disambiguate_move(move, matches)
+    end
+  end
+
+  def disambiguate_move(move, matches)
+    disambiguate_matching_square(move, matches) ||
+      disambiguate_matching_row(move, matches) ||
+      disambiguate_matching_col(move, matches) ||
+      false
+  end
+
+  def disambiguate_matching_square(move, matches)
+    matching_square = matches.select { |match| match[1] == move[1] }
+    matching_square[0] if matching_square.size == 1
+  end
+
+  def disambiguate_matching_row(move, matches)
+    matching_row = matches.select { |match| match[1][0] == move[1][0] }
+    matching_row[0] if matching_row.size == 1
+  end
+
+  def disambiguate_matching_col(move, matches)
+    matching_col = matches.select { |match| match[1][1] == move[1][1] }
+    matching_col[0] if matching_col.size == 1
   end
 end
