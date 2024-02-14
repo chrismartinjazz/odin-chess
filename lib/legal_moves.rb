@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'legal_castling_moves'
+require_relative 'test_for_check'
 
 # Finds legal moves in the position.
 module LegalMoves
@@ -19,7 +20,10 @@ module LegalMoves
         legal_moves_list += find_moves_for_piece(board, piece, origin, active_player)
       end
     end
-    legal_moves_list += legal_castling_moves(board, king_position, can_castle, color) if active_player
+    if active_player
+      legal_moves_list += legal_castling_moves(board, king_position, can_castle,
+                                               color)
+    end
     legal_moves_list
   end
 
@@ -101,8 +105,6 @@ module LegalMoves
 
   def add_move(moves, piece, origin, destination, active_player)
     move = [piece.to_s, origin, destination]
-    # TODO: once TestForCheck is a module, include into this module to extend functionality rather than
-    # calling back to it like this.
     moves.push(move) unless active_player && test_for_check?(move)
   end
 end

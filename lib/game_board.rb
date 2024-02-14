@@ -4,12 +4,14 @@ require_relative 'board_displayer'
 require_relative 'legal_moves'
 require_relative 'pieces'
 require_relative 'position_read_write'
+require_relative 'test_for_check'
 # rubocop:disable Metrics/ClassLength
 # rubocop:disable Metrics/MethodLength
 
 # Holds the pieces and finds legal moves
 class GameBoard
   include LegalMoves
+  include TestForCheck
 
   attr_accessor :board
 
@@ -21,6 +23,15 @@ class GameBoard
     }
     @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
     @en_passant_option = nil
+  end
+
+  def find_king(color)
+    (0..7).each do |row_i|
+      (0..7).each do |col_i|
+        return [row_i, col_i] if @board[row_i][col_i].is_a?(King) && @board[row_i][col_i].color == color
+      end
+    end
+    nil
   end
 
   ## Making moves
@@ -50,14 +61,16 @@ class GameBoard
     move[0] == 'K' ? @king_position['W'] = move[2] : @king_position['B'] = move[2]
   end
 
-  ## Handling specific moves
-  ### Castling
   def castle(move)
     rook_letter = move[0] == 'K' ? 'R' : 'r'
     rook_row = move[1][0]
     rook_start_col = move[2][1] == 2 ? 0 : 7
     rook_end_col = move[2][1] == 2 ? 3 : 5
     move_piece([rook_letter, [rook_row, rook_start_col], [rook_row, rook_end_col]], testing_for_check: false)
+  end
+
+  def castling?(move)
+    move[0].upcase == 'K' && (move[1][1] - move[2][1]).abs == 2
   end
 
   def update_can_castle(start_sq)
@@ -79,11 +92,6 @@ class GameBoard
     end
   end
 
-  def castling?(move)
-    move[0].upcase == 'K' && (move[1][1] - move[2][1]).abs == 2
-  end
-
-  ### Pawns
   def promote_pawn(move, promotion_piece)
     color = move[0] == 'P' ? 'W' : 'B'
     map = {
@@ -117,44 +125,6 @@ class GameBoard
     captured_pawn
   end
 
-  ## Testing for check - this could move to a module (and pass in ) (as king_position can change state).
-  # Has to access move_piece.
-  def test_for_check?(move)
-    player_color = move[0].upcase == move[0] ? 'W' : 'B'
-    # Make the move and test for check, storing the original occupant to undo move later.
-    original_occupant = move_piece(move, testing_for_check: true)
-    in_check = in_check?(player_color)
-    undo_move(player_color, move, original_occupant)
-    in_check
-  end
-
-  def in_check?(color)
-    return false if @king_position[color].nil?
-
-    opponent_color = color == 'W' ? 'B' : 'W'
-    opponent_legal_moves = find_legal_moves(opponent_color, active_player: false)
-    opponent_legal_moves.each do |move|
-      return true if move[2] == @king_position[color]
-    end
-    false
-  end
-
-  def undo_move(_player_color, move, original_occupant)
-    move_piece([move[0], move[2], move[1]], testing_for_check: true)
-    # @king_position[player_color] = find_king(player_color) if move[0].upcase == 'K'
-    @board[move[2][0]][move[2][1]] = original_occupant
-  end
-
-  def find_king(color)
-    (0..7).each do |row_i|
-      (0..7).each do |col_i|
-        return [row_i, col_i] if @board[row_i][col_i].is_a?(King) && @board[row_i][col_i].color == color
-      end
-    end
-    nil
-  end
-
-  ## Other
   def display
     BoardDisplayer.display(@board)
   end
@@ -163,7 +133,6 @@ class GameBoard
     PositionReadWrite.write_position(@board)
   end
 
-  # Calls module LegalMoves
   def find_legal_moves(color, active_player: true)
     legal_moves(@board, @king_position, @can_castle, color, active_player:)
   end

@@ -69,3 +69,4 @@
             @game_board.find_legal_moves
     - GameBoard
         - #in_check? (in conjunction with @king_position)
+GameBoard:135

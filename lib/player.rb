@@ -34,12 +34,10 @@ end
 class PlayerComputer < Player
   def initialize(color)
     super(color)
-    # @move_converter = MoveConverter.new
   end
 
   def ask_move(legal_moves = nil)
     Convert::ArrayToText.array_to_text(legal_moves.sample)
-    # @move_converter.array_to_alg_move(legal_moves.sample)
   end
 
   def ask_promotion_piece

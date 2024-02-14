@@ -4,8 +4,6 @@ require_relative 'file_manager'
 
 # Handles the end of the game
 module GameOver
-  extend self
-
   def game_over(move, legal_moves_list)
     player_in_check = @game_board.in_check?(@current_player.color)
     if legal_moves_list.empty? && player_in_check
@@ -33,8 +31,6 @@ module GameOver
       system(exit)
     end
   end
-
-  private
 
   def handle_checkmate
     @move_list.push('#', @current_player.color == 'W' ? '0-1' : '1-0')
