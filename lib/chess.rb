@@ -8,7 +8,6 @@ require_relative 'update_display'
 
 class Chess
   include GameOver
-  include UpdateDisplay
 
   attr_reader :move_list
 
@@ -43,13 +42,13 @@ class Chess
 
   def game_loop
     loop do
-      puts update_display(@current_player, @move_list, @game_board)
+      puts UpdateDisplay.update_display(@current_player, @move_list, @game_board)
       legal_moves_list = @game_board.find_legal_moves(@current_player.color)
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
-      new_save_load_exit(move) if %w[new save load exit].include?(move)
+      GameOver.new_save_load_exit(move) if %w[new save load exit].include?(move)
       if legal_moves_list.empty? || %w[draw resign].include?(move)
-        puts update_display(@current_player, @move_list, @game_board)
-        game_over(move, legal_moves_list)
+        puts UpdateDisplay.update_display(@current_player, @move_list, @game_board)
+        GameOver.game_over(move, legal_moves_list)
         next
       end
       make_move(move, legal_moves_list) unless %w[new save load].include?(move)

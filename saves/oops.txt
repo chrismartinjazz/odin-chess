@@ -1,0 +1,1 @@
+{"current_player_color":"W","move_list":["e4","Nh6","e5","c6","e6","d5","exf7","Nxf7","Qh5","Be6","Bd3","b5","Nf3","Qc8","Ng5","a6","Qxf7","Bxf7"],"position":["rnq.kb.r","....pbpp","p.p.....",".p.p..N.","........","...B....","PPPP.PPP","RNB.K..R"]}

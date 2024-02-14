@@ -3,9 +3,11 @@
 require 'colorize'
 
 # Converts a board with piece objects into a colorized string with icons.
-class BoardDisplayer
+module BoardDisplayer
   ICON_MAP = { 'K' => '♚ ', 'Q' => '♛ ', 'R' => '♜ ', 'B' => '♝ ', 'N' => '♞ ', 'P' => '♟︎ ',
                'k' => '♔ ', 'q' => '♕ ', 'r' => '♖ ', 'b' => '♗ ', 'n' => '♘ ', 'p' => '♙ ' }.freeze
+
+  extend self
 
   def display(board, string = '')
     board_icons = convert_board_to_icons(board)
@@ -16,6 +18,8 @@ class BoardDisplayer
     end
     "#{string}  a b c d e f g h\n"
   end
+
+  private
 
   def convert_board_to_icons(board)
     board_icons = []

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'colorize'
 require_relative 'board_displayer'
 require_relative 'legal_moves'
 require_relative 'pieces'
@@ -16,7 +15,6 @@ class GameBoard
 
   def initialize(position_text = nil)
     @board = position_text ? PositionReadWrite.read_position(position_text) : Array.new(8) { Array.new(8) }
-    @board_displayer = BoardDisplayer.new
     @can_castle = {
       w_king_side: true, w_queen_side: true,
       b_king_side: true, b_queen_side: true
@@ -158,7 +156,7 @@ class GameBoard
 
   ## Other
   def display
-    @board_displayer.display(@board)
+    BoardDisplayer.display(@board)
   end
 
   def write_position

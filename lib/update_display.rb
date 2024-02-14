@@ -2,10 +2,14 @@
 
 # Updates all elements of the display
 module UpdateDisplay
+  extend self
+
   def update_display(current_player, move_list, game_board)
     clear_screen
     "#{display_title}#{display_current_player(current_player)}#{game_board.display}#{display_move_list(move_list)}\n"
   end
+
+  private
 
   def clear_screen(testing: false)
     return if testing == true
