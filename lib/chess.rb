@@ -1,16 +1,13 @@
 # frozen_string_literal: true
 
-require_relative 'convert_move'
+require_relative 'convert'
 require_relative 'file_manager'
 require_relative 'game_board'
 require_relative 'game_over'
-# require_relative 'move_converter'
 require_relative 'player'
 require_relative 'update_display'
 
-# The main game loop
 class Chess
-  include ConvertMove
   include GameOver
   include UpdateDisplay
 
@@ -30,7 +27,6 @@ class Chess
     @player1 = player1 || ask_player_type('White')
     @player2 = player2 || ask_player_type('Black')
     @game_board = GameBoard.new(@initial_position)
-    # @move_converter = MoveConverter.new
     @current_player = @player1
     @move_list = []
     @file_manager = FileManager.new
@@ -68,8 +64,7 @@ class Chess
       move = @current_player.ask_move(legal_moves_list)
       return move if %w[save load new resign draw exit].include?(move)
 
-      accepted_move = convert_text_move_to_array(move, @current_player.color, legal_moves_list)
-      # accepted_move = in_legal_moves(valid_move, legal_moves_list) if valid_move
+      accepted_move = Convert::TextToArray.text_to_array(move, @current_player.color, legal_moves_list)
     end
     sleep(0.5) if @current_player.is_a?(PlayerComputer)
     accepted_move
@@ -78,10 +73,8 @@ class Chess
   def make_move(move, legal_moves_list)
     promotion_piece = @current_player.ask_promotion_piece if pawn_promoting?(move)
     capture = @game_board.move_piece(move, promotion_piece)
-    @move_list << convert_array_to_text_move(move, capture, legal_moves_list,
-                                             in_check: @game_board.in_check?(@current_player.color))
-    # @move_list << @move_converter.array_to_alg_move(move, capture, legal_moves_list,
-    #                                                 in_check: @game_board.in_check?(@current_player.color))
+    @move_list << Convert::ArrayToText.array_to_text(move, capture, legal_moves_list,
+                                                     in_check: @game_board.in_check?(@current_player.color))
     next_player
   end
 
@@ -92,42 +85,4 @@ class Chess
   def next_player
     @current_player = @current_player == @player1 ? @player2 : @player1
   end
-
-  # Could these methods and logic go into MoveConverter? Yes but then MoveConverter is coupled through to legal_moves.
-  # MoveConverter just knows how to convert algebraic notation to a move and vice versa.
-  # I guess it could be given legal_moves as an optional parameter? Possible.
-  # Currently this is the 'part' of the move analysis that links together the legal_moves and the move_converter.
-  # def in_legal_moves(move, legal_moves_list)
-  #   matches = legal_moves_list.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
-  #   case matches.length
-  #   when 0
-  #     false
-  #   when 1
-  #     matches[0]
-  #   else
-  #     disambiguate_move(move, matches)
-  #   end
-  # end
-
-  # def disambiguate_move(move, matches)
-  #   disambiguate_matching_square(move, matches) ||
-  #     disambiguate_matching_row(move, matches) ||
-  #     disambiguate_matching_col(move, matches) ||
-  #     false
-  # end
-
-  # def disambiguate_matching_square(move, matches)
-  #   matching_square = matches.select { |match| match[1] == move[1] }
-  #   matching_square[0] if matching_square.size == 1
-  # end
-
-  # def disambiguate_matching_row(move, matches)
-  #   matching_row = matches.select { |match| match[1][0] == move[1][0] }
-  #   matching_row[0] if matching_row.size == 1
-  # end
-
-  # def disambiguate_matching_col(move, matches)
-  #   matching_col = matches.select { |match| match[1][1] == move[1][1] }
-  #   matching_col[0] if matching_col.size == 1
-  # end
 end

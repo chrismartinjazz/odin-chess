@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'move_converter'
+require_relative 'convert'
 
 # A chess player
 class Player
@@ -34,11 +34,11 @@ end
 class PlayerComputer < Player
   def initialize(color)
     super(color)
-    @move_converter = MoveConverter.new
+    # @move_converter = MoveConverter.new
   end
 
   def ask_move(legal_moves = nil)
-    @move_converter.convert_array_to_text(legal_moves.sample)
+    Convert::ArrayToText.array_to_text(legal_moves.sample)
     # @move_converter.array_to_alg_move(legal_moves.sample)
   end
 

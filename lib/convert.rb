@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-module ConvertMove
+# Converts a Chess move
+module Convert
   MAP_ROW = { nil => nil, '8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7 }.freeze
   MAP_COL = { nil => nil, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7 }.freeze
 
-  module ConvertTextMoveToArray
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
+  extend self
 
+  # Converts algebraic move to an array [<piece>, <origin>, <destination>]
+  module TextToArray
     VALIDATION_ATTEMPT = /^[a-hKQRBNP]{1}[a-h1-9x]{1,5}[+#?! ]*?$/
     VALIDATION_NOT_END_WITH_X = /[^x]$/
     VALIDATION_ALGEBRAIC = /[a-h1-8KQRBNP]/
@@ -17,23 +17,23 @@ module ConvertMove
     VALIDATION_LENGTH4 = /^[KQRNBP]{1}[a-h1-8]{1}[a-h]{1}[1-8]{1}$/
     VALIDATION_LENGTH5 = /^[KQRNBP]{1}[a-h]{1}[1-8]{1}[a-h]{1}[1-8]{1}$/
 
-    module ClassMethods
-      def convert_text_move_to_array(move, color, legal_moves)
-        return castling(move, color) if castling(move, color)
+    extend self
 
-        return nil unless attempted_move?(move)
+    def text_to_array(move, color, legal_moves = nil)
+      return castling(move, color) if %w[O-O 0-0 O-O-O 0-0-0].include?(move)
 
-        stripped_move = strip_non_algebraic_chars(move)
-        stripped_move.prepend('P') unless stripped_move.slice(0).upcase == stripped_move.slice(0)
-        return nil unless valid_move?(stripped_move)
+      return nil unless attempted_move?(move)
 
-        # Move is now 3-5 characters, in format:
-        # Piece, (opt. disambiguation 1), (opt. disambiguation 2), destination column, destination row
-        move_array = convert_to_array(stripped_move, color)
-        nil unless in_legal_moves(move_array, legal_moves)
+      stripped_move = strip_non_algebraic_chars(move)
+      stripped_move.prepend('P') unless stripped_move.slice(0).upcase == stripped_move.slice(0)
+      return nil unless valid_move?(stripped_move)
 
-        move_array
-      end
+      # Move is now 3-5 characters, in format:
+      # Piece, (opt. disambiguation 1), (opt. disambiguation 2), destination column, destination row
+      move_array = convert_to_array(stripped_move, color)
+      return match_legal_moves(move_array, legal_moves) if legal_moves
+
+      move_array
     end
 
     private
@@ -97,7 +97,7 @@ module ConvertMove
       [dest_row, dest_col]
     end
 
-    def in_legal_moves(move, legal_moves)
+    def match_legal_moves(move, legal_moves)
       matches = legal_moves.select { |legal_move| legal_move[0] == move[0] && legal_move[2] == move[2] }
       case matches.length
       when 0
@@ -132,11 +132,8 @@ module ConvertMove
     end
   end
 
-  module ConvertArrayToTextMove
-    def self.included(base)
-      base.extend(ClassMethods)
-    end
-
+  # Converts an array [<piece>, <origin>, <destination>] to an algebraic chess move
+  module ArrayToText
     MAP_CASTLING = {
       ['K', [7, 4], [7, 6]] => '0-0',
       ['K', [7, 4], [7, 2]] => '0-0-0',
@@ -144,25 +141,25 @@ module ConvertMove
       ['k', [0, 4], [0, 2]] => '0-0-0'
     }.freeze
 
-    module ClassMethods
-      def convert_array_to_text_move(move, capture = nil, legal_moves = nil, in_check: false)
-        return castling(move) if castling(move)
+    extend self
 
-        return move unless expected_format?(move)
+    def array_to_text(move, capture = nil, legal_moves = nil, in_check: false)
+      return castling(move) if castling(move)
 
-        piece_char = move[0].upcase
+      return move unless expected_format?(move)
 
-        piece = piece_char == 'P' ? '' : piece_char
-        disambiguation = disambiguate_move(move, legal_moves)
-        pawn_col = pawn_capture(move, capture, piece_char)
-        capturing = capturing(move, capture, piece_char)
-        destination = destination(move)
-        pawn_prom = pawn_prom(move, capture, piece_char)
-        check = in_check ? '+' : ''
+      piece_char = move[0].upcase
 
-        # Return the formatted move with dots in place of missing elements: "Qa1xa3.+", ".d.xe4..", "....e8Q."
-        "#{piece}#{disambiguation.join}#{pawn_col}#{capturing}#{destination.join}#{pawn_prom}#{check}"
-      end
+      piece = piece_char == 'P' ? '' : piece_char
+      disambiguation = disambiguate_move(move, legal_moves)
+      pawn_col = pawn_capture(move, capture, piece_char)
+      capturing = capturing(move, capture, piece_char)
+      destination = destination(move)
+      pawn_prom = pawn_prom(move, capture, piece_char)
+      check = in_check ? '+' : ''
+
+      # Return the formatted move with dots in place of missing elements: "Qa1xa3.+", ".d.xe4..", "....e8Q."
+      "#{piece}#{disambiguation.join}#{pawn_col}#{capturing}#{destination.join}#{pawn_prom}#{check}"
     end
 
     private
