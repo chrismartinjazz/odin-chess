@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'convert'
-require_relative 'file_manager'
 require_relative 'game_board'
 require_relative 'game_over'
 require_relative 'player'
@@ -29,7 +28,6 @@ class Chess
     @game_board = GameBoard.new(@initial_position)
     @current_player = @player1
     @move_list = []
-    @file_manager = FileManager.new
   end
 
   def ask_player_type(color)

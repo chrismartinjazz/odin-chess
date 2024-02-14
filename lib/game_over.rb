@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'file_manager'
+
 # Handles the end of the game
 module GameOver
   def game_over(move, legal_moves_list)
@@ -70,7 +72,7 @@ module GameOver
   end
 
   def save_game(game_state)
-    puts @file_manager.save_file(game_state) ? "\nSave successful" : "\nFile not saved"
+    puts FileManager.save_file(game_state) ? "\nSave successful" : "\nFile not saved"
     puts 'Press Enter to continue'
     gets
     nil
@@ -85,7 +87,7 @@ module GameOver
   end
 
   def load_game
-    game_data = @file_manager.load_file
+    game_data = FileManager.load_file
     new_game(game_data)
   end
 end

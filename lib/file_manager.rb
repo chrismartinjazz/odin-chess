@@ -3,7 +3,9 @@
 require 'json'
 
 # Saves and loads the game.
-class FileManager
+module FileManager
+  extend self
+
   def save_file(save_data)
     files = save_file_list
     puts "\nExisting save files are listed below:\n"
@@ -35,6 +37,8 @@ class FileManager
     data = JSON.load file.gets
     data.transform_keys!(&:to_sym)
   end
+
+  private
 
   def save_file_list
     if Dir.exist?('saves/.')

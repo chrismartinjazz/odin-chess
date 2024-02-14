@@ -3,7 +3,7 @@
 require_relative 'pieces'
 
 # Reads a position from a text string and generates a 2D array board of pieces, nil for empty squares.
-class PositionReadWrite
+module PositionReadWrite
   PIECE_MAP = {
     '.' => nil,
     'P' => Pawn,
@@ -14,9 +14,7 @@ class PositionReadWrite
     'K' => King
   }.freeze
 
-  def initialize
-    @map = { 'N' => Knight, 'R' => Rook, 'B' => Bishop, 'Q' => Queen, 'K' => King, 'P' => Pawn }
-  end
+  extend self
 
   def read_position(position_text)
     new_position = []
@@ -24,13 +22,6 @@ class PositionReadWrite
       new_position.push(position_text[row].chars.map { |char| char_to_piece(char) })
     end
     new_position
-  end
-
-  def char_to_piece(char)
-    piece_type = char.upcase
-    color = piece_type == char ? 'W' : 'B'
-    piece_class = PIECE_MAP[piece_type]
-    piece_class&.new(color)
   end
 
   def write_position(board)
@@ -43,6 +34,15 @@ class PositionReadWrite
       output << row_str
     end
     output
+  end
+
+  private
+
+  def char_to_piece(char)
+    piece_type = char.upcase
+    color = piece_type == char ? 'W' : 'B'
+    piece_class = PIECE_MAP[piece_type]
+    piece_class&.new(color)
   end
 
   def piece_to_char(piece)
