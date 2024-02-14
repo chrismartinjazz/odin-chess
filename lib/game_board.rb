@@ -117,7 +117,7 @@ class GameBoard
     captured_pawn
   end
 
-  ## Testing for check - this could move to a class (as king_position can change state).
+  ## Testing for check - this could move to a module (and pass in ) (as king_position can change state).
   # Has to access move_piece.
   def test_for_check?(move)
     player_color = move[0].upcase == move[0] ? 'W' : 'B'

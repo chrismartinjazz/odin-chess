@@ -66,5 +66,6 @@
 - legal_moves is called from:
     - Chess
         - #game_loop (for current_player)
+            @game_board.find_legal_moves
     - GameBoard
         - #in_check? (in conjunction with @king_position)
