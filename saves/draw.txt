@@ -1,1 +1,0 @@
-{"current_player_color":"W","move_list":["(=)","½–½"],"position":["rnbqkbnr","pppppppp","........","........","........","........","PPPPPPPP","RNBQKBNR"]}

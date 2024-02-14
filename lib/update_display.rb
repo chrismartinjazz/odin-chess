@@ -6,7 +6,7 @@ module UpdateDisplay
 
   def update_display(current_player, move_list, game_board)
     clear_screen
-    "#{display_title}#{display_current_player(current_player)}#{game_board.display}#{display_move_list(move_list)}\n"
+    "#{game_board.fifty_move_counter}\n#{display_title}#{display_current_player(current_player)}#{game_board.display}#{display_move_list(move_list)}\n"
   end
 
   private
@@ -17,7 +17,6 @@ module UpdateDisplay
     Gem.win_platform? ? (system 'cls') : (system 'clear')
   end
 
-  # Display
   def display_title
     <<~HEREDOC
         ___ _    ___      _
@@ -33,7 +32,6 @@ module UpdateDisplay
     HEREDOC
   end
 
-  # Display
   def display_current_player(current_player)
     <<~HEREDOC
       #{current_player.color == 'W' ? '>> White <<' : '   White'}

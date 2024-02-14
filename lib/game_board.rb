@@ -6,14 +6,13 @@ require_relative 'pieces'
 require_relative 'position_read_write'
 require_relative 'test_for_check'
 # rubocop:disable Metrics/ClassLength
-# rubocop:disable Metrics/MethodLength
 
 # Holds the pieces and finds legal moves
 class GameBoard
   include LegalMoves
   include TestForCheck
 
-  attr_accessor :board
+  attr_accessor :board, :fifty_move_counter
 
   def initialize(position_text = nil)
     @board = position_text ? PositionReadWrite.read_position(position_text) : Array.new(8) { Array.new(8) }
@@ -23,6 +22,8 @@ class GameBoard
     }
     @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
     @en_passant_option = nil
+    # Todo - this is almost working but move it to the Chess class, and fix for castling and other exceptions.
+    @fifty_move_counter = 0
   end
 
   def find_king(color)
@@ -40,6 +41,7 @@ class GameBoard
     destination_square_occupant = make_move(move[1], move[2])
     update_king_position(move) if move[0].upcase == 'K'
     unless testing_for_check
+      update_fifty_move_counter(move, destination_square_occupant)
       castle(move) if castling?(move)
       update_can_castle(move[1])
       promote_pawn(move, promotion_piece) if promotion_piece
@@ -59,6 +61,10 @@ class GameBoard
 
   def update_king_position(move)
     move[0] == 'K' ? @king_position['W'] = move[2] : @king_position['B'] = move[2]
+  end
+
+  def update_fifty_move_counter(move, destination_square_occupant)
+    move[0].upcase == 'P' || destination_square_occupant ? @fifty_move_counter = 0 : @fifty_move_counter += 1
   end
 
   def castle(move)

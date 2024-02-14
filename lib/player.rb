@@ -32,10 +32,6 @@ end
 
 # A computer player - selects a random legal move
 class PlayerComputer < Player
-  def initialize(color)
-    super(color)
-  end
-
   def ask_move(legal_moves = nil)
     Convert::ArrayToText.array_to_text(legal_moves.sample)
   end

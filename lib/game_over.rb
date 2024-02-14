@@ -4,7 +4,7 @@ require_relative 'file_manager'
 
 # Handles the end of the game
 module GameOver
-  def game_over(move, legal_moves_list)
+  def game_over(move, legal_moves_list, fifty_move_counter)
     player_in_check = @game_board.in_check?(@current_player.color)
     if legal_moves_list.empty? && player_in_check
       message = handle_checkmate
@@ -14,6 +14,8 @@ module GameOver
       message = handle_draw
     elsif move == 'resign'
       message = handle_resign
+    elsif fifty_move_counter > 50
+      message = handle_fifty_move_rule
     end
     puts message
     new_save_load_exit(ask_game_over_action)
@@ -50,6 +52,11 @@ module GameOver
   def handle_resign
     @move_list.push('resigns', @current_player.color == 'W' ? '0-1' : '1-0')
     "#{@current_player.color == 'W' ? 'White' : 'Black'} resigns.\n\n"
+  end
+
+  def handle_fifty_move_rule
+    @move_list.push('(=)', '½–½')
+    'Game drawn - fifty moves without a pawn move or capture.'
   end
 
   def ask_game_over_action

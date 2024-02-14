@@ -6,6 +6,7 @@ require_relative 'game_over'
 require_relative 'player'
 require_relative 'update_display'
 
+# Chess game using algebraic move input
 class Chess
   include GameOver
 
