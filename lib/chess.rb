@@ -64,7 +64,7 @@ class Chess
 
       accepted_move = Convert::TextToArray.text_to_array(move, @current_player.color, legal_moves_list)
     end
-    sleep(0.05) if @current_player.is_a?(PlayerComputer)
+    sleep(0.5) if @current_player.is_a?(PlayerComputer)
     accepted_move
   end
 
