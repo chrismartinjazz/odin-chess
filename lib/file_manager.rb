@@ -14,6 +14,8 @@ module FileManager
     puts "\nName your save file - 'cancel' to cancel\n"
     file_name = ask_file_name
 
+    return false if file_name == ''
+
     File.open("saves/#{file_name}.txt", 'w') do |file|
       file.puts save_data.to_json
     end

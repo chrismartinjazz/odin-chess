@@ -4,19 +4,22 @@ require_relative 'file_manager'
 
 # Handles the end of the game
 module GameOver
-  def game_over(move, legal_moves_list, fifty_move_counter)
+  def game_over(condition)
     player_in_check = @game_board.in_check?(@current_player.color)
-    if legal_moves_list.empty? && player_in_check
+    if condition == 'no legal moves' && player_in_check
       message = handle_checkmate
-    elsif legal_moves_list.empty? && !player_in_check
+    elsif condition == 'no legal moves' && !player_in_check
       message = handle_stalemate
-    elsif move == 'draw'
+    elsif condition == 'draw'
       message = handle_draw
-    elsif move == 'resign'
+    elsif condition == 'resign'
       message = handle_resign
-    elsif fifty_move_counter >= 50
+    elsif condition == 'fifty move rule'
       message = handle_fifty_move_rule
+    elsif condition == 'insufficient material'
+      message = handle_insufficient_material
     end
+    puts UpdateDisplay.update_display(@current_player, @move_list, @game_board)
     puts message
     new_save_load_exit(ask_game_over_action)
   end
@@ -59,6 +62,11 @@ module GameOver
     'Game drawn - fifty moves without a pawn move or capture.'
   end
 
+  def handle_insufficient_material
+    @move_list.push('(=)', '½–½')
+    'Game drawn - insufficient material.'
+  end
+
   def ask_game_over_action
     action = nil
     puts 'new : load : exit ?'
@@ -95,6 +103,6 @@ module GameOver
 
   def load_game
     game_data = FileManager.load_file
-    new_game(game_data)
+    game_data ? new_game(game_data) : new_game
   end
 end

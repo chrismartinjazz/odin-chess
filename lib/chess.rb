@@ -47,12 +47,15 @@ class Chess
       legal_moves_list = @game_board.find_legal_moves(@current_player.color)
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
+
       if legal_moves_list.empty? || %w[draw resign].include?(move) || @game_board.fifty_move_counter >= 50
-        puts UpdateDisplay.update_display(@current_player, @move_list, @game_board)
-        game_over(move, legal_moves_list, @game_board.fifty_move_counter)
+        game_over('no legal moves') if legal_moves_list.empty?
+        game_over(move) if %w[draw resign].include?(move)
+        game_over('fifty move rule') if @game_board.fifty_move_counter >= 50
         next
       end
-      make_move(move, legal_moves_list) unless %w[new save load].include?(move)
+      capture = make_move(move, legal_moves_list) unless %w[new save load].include?(move)
+      check_for_insufficient_material if capture
     end
   end
 
@@ -64,7 +67,7 @@ class Chess
 
       accepted_move = Convert::TextToArray.text_to_array(move, @current_player.color, legal_moves_list)
     end
-    sleep(0.5) if @current_player.is_a?(PlayerComputer)
+    sleep(0.05) if @current_player.is_a?(PlayerComputer)
     accepted_move
   end
 
@@ -74,6 +77,15 @@ class Chess
     @move_list << Convert::ArrayToText.array_to_text(move, capture, legal_moves_list,
                                                      in_check: @game_board.in_check?(@current_player.color))
     next_player
+    capture
+  end
+
+  def check_for_insufficient_material
+    return unless %w[K KN BK KNN].include?(@game_board.material['W'])
+
+    return unless %w[k kn bk knn].include?(@game_board.material['B'])
+
+    game_over('insufficient material')
   end
 
   def pawn_promoting?(move)

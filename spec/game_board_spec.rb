@@ -33,6 +33,10 @@ describe GameBoard do
   subject(:game_board_knight) { described_class.new(one_knight) }
 
   context 'When the board has just one white knight' do
+    it 'correctly initializes the white material as "N"' do
+      expect(game_board_knight.material).to eql({ 'W' => 'N', 'B' => '' })
+    end
+
     it 'initializes to a white knight in the corner with appropriate argument' do
       expect(game_board_knight.board[7][0]).to be_a Knight
       expect(game_board_knight.board[7][1]).to be nil
@@ -80,6 +84,10 @@ describe GameBoard do
 
   subject(:game_board_two_knights) { described_class.new(two_knights) }
   context 'When the board has one black and one white knight' do
+    it 'correctly initializes the material for both players' do
+      expect(game_board_two_knights.material).to eql({ 'W' => 'N', 'B' => 'n' })
+    end
+
     it 'initializes to knights in the corner with appropriate argument' do
       expect(game_board_two_knights.board[7][0]).to be_a Knight
       expect(game_board_two_knights.board[7][1]).to be nil
@@ -119,6 +127,10 @@ describe GameBoard do
 
   subject(:game_board_main_pieces) { described_class.new(main_pieces) }
   context 'when the board has all major pieces and no pawns' do
+    it 'correctly initializes the material for both players' do
+      expect(game_board_main_pieces.material).to eql({ 'W' => 'BBKNNQRR', 'B' => 'bbknnqrr' })
+    end
+
     it 'initializes row 1 with correct piece types' do
       expect(game_board_main_pieces.board[7][0]).to be_a Rook
       expect(game_board_main_pieces.board[7][1]).to be_a Knight
@@ -272,6 +284,12 @@ describe GameBoard do
     RNBQKBNR
   ]
   subject(:game_board_starting_pos) { described_class.new(starting_pos) }
+  context 'When initializing a standard position' do
+    it 'correctly initializes the material for both players' do
+      expect(game_board_starting_pos.material).to eql({ 'W' => 'BBKNNPPPPPPPPQRR', 'B' => 'bbknnppppppppqrr' })
+    end
+  end
+
   context 'When moving into castling position' do
     describe '#move_piece' do
       it 'plays a legal sequence of moves including castling' do

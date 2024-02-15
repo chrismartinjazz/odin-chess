@@ -12,7 +12,7 @@ class GameBoard
   include LegalMoves
   include TestForCheck
 
-  attr_accessor :board, :fifty_move_counter
+  attr_accessor :board, :fifty_move_counter, :material
 
   def initialize(position_text = nil)
     @board = position_text ? PositionReadWrite.read_position(position_text) : Array.new(8) { Array.new(8) }
@@ -21,9 +21,9 @@ class GameBoard
       b_king_side: true, b_queen_side: true
     }
     @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
+    @material = { 'W' => find_material('W'), 'B' => find_material('B') }
     @en_passant_option = nil
     @fifty_move_counter = 0
-    # @black_material = find_material('B')
   end
 
   def find_king(color)
@@ -33,6 +33,20 @@ class GameBoard
       end
     end
     nil
+  end
+
+  def find_material(color)
+    material = []
+    # Loop through the board adding to an array every time a piece of correct type appears
+    # Sort the array
+    (0..7).each do |row_i|
+      (0..7).each do |col_i|
+        next if @board[row_i][col_i].nil? || @board[row_i][col_i].color != color
+
+        material.push(@board[row_i][col_i].to_s)
+      end
+    end
+    material.sort.join
   end
 
   ## Making moves
@@ -49,7 +63,12 @@ class GameBoard
       @en_passant_options = nil
       pawn_two_square_advance(move)
     end
-    en_passant_captured_pawn || promotion_piece || destination_square_occupant
+    color = move[0].upcase == move[0] ? 'W' : 'B'
+    opponent_color = color == 'W' ? 'B' : 'W'
+    capture = en_passant_captured_pawn || destination_square_occupant || nil
+    @material[opponent_color] = find_material(opponent_color) if capture && !testing_for_check
+    @material[color] = find_material(color) if promotion_piece && !testing_for_check
+    capture || promotion_piece
   end
 
   def make_move(origin, destination)

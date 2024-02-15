@@ -6,7 +6,7 @@ module UpdateDisplay
 
   def update_display(current_player, move_list, game_board)
     clear_screen
-    "#{game_board.fifty_move_counter}\n#{display_title}#{display_current_player(current_player)}#{game_board.display}#{display_move_list(move_list)}\n"
+    "#{display_title}#{display_current_player(current_player)}#{game_board.display}#{display_move_list(move_list)}\n"
   end
 
   private
