@@ -47,9 +47,9 @@ class Chess
       legal_moves_list = @game_board.find_legal_moves(@current_player.color)
       move = ask_player_move(legal_moves_list) unless legal_moves_list.empty?
       new_save_load_exit(move) if %w[new save load exit].include?(move)
-      if legal_moves_list.empty? || %w[draw resign].include?(move)
+      if legal_moves_list.empty? || %w[draw resign].include?(move) || @game_board.fifty_move_counter >= 50
         puts UpdateDisplay.update_display(@current_player, @move_list, @game_board)
-        game_over(move, legal_moves_list)
+        game_over(move, legal_moves_list, @game_board.fifty_move_counter)
         next
       end
       make_move(move, legal_moves_list) unless %w[new save load].include?(move)

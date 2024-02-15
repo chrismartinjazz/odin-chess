@@ -14,7 +14,7 @@ module GameOver
       message = handle_draw
     elsif move == 'resign'
       message = handle_resign
-    elsif fifty_move_counter > 50
+    elsif fifty_move_counter >= 50
       message = handle_fifty_move_rule
     end
     puts message

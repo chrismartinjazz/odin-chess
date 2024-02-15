@@ -22,8 +22,8 @@ class GameBoard
     }
     @king_position = { 'W' => find_king('W'), 'B' => find_king('B') }
     @en_passant_option = nil
-    # Todo - this is almost working but move it to the Chess class, and fix for castling and other exceptions.
     @fifty_move_counter = 0
+    # @black_material = find_material('B')
   end
 
   def find_king(color)
@@ -64,7 +64,13 @@ class GameBoard
   end
 
   def update_fifty_move_counter(move, destination_square_occupant)
-    move[0].upcase == 'P' || destination_square_occupant ? @fifty_move_counter = 0 : @fifty_move_counter += 1
+    if move[0].upcase == 'P' || destination_square_occupant
+      @fifty_move_counter = 0
+    elsif castling?(move)
+      nil
+    else
+      @fifty_move_counter += 1
+    end
   end
 
   def castle(move)
