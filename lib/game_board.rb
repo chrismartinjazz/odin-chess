@@ -56,19 +56,18 @@ class GameBoard
     update_king_position(move) if move[0].upcase == 'K'
     unless testing_for_check
       update_fifty_move_counter(move, destination_square_occupant)
-      castle(move) if castling?(move)
-      update_can_castle(move[1])
-      promote_pawn(move, promotion_piece) if promotion_piece
-      en_passant_captured_pawn = en_passant_capture(move)
-      @en_passant_options = nil
-      pawn_two_square_advance(move)
+      en_passant_captured_pawn = handle_special_moves(move, promotion_piece)
+      capture = en_passant_captured_pawn || destination_square_occupant || nil
+      update_material(move, capture, promotion_piece) if capture || promotion_piece
     end
+    en_passant_captured_pawn || destination_square_occupant
+  end
+
+  def update_material(move, capture, promotion_piece)
     color = move[0].upcase == move[0] ? 'W' : 'B'
     opponent_color = color == 'W' ? 'B' : 'W'
-    capture = en_passant_captured_pawn || destination_square_occupant || nil
-    @material[opponent_color] = find_material(opponent_color) if capture && !testing_for_check
-    @material[color] = find_material(color) if promotion_piece && !testing_for_check
-    capture || promotion_piece
+    @material[opponent_color] = find_material(opponent_color) if capture
+    @material[color] = find_material(color) if promotion_piece
   end
 
   def make_move(origin, destination)
@@ -90,6 +89,16 @@ class GameBoard
     else
       @fifty_move_counter += 1
     end
+  end
+
+  def handle_special_moves(move, promotion_piece)
+    castle(move) if castling?(move)
+    update_can_castle(move[1])
+    promote_pawn(move, promotion_piece) if promotion_piece
+    en_passant_captured_pawn = en_passant_capture(move)
+    @en_passant_options = nil
+    pawn_two_square_advance(move)
+    en_passant_captured_pawn
   end
 
   def castle(move)
@@ -168,4 +177,3 @@ class GameBoard
     legal_moves(@board, @king_position, @can_castle, color, active_player:)
   end
 end
-# rubocop:enable Metrics/ClassLength
