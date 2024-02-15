@@ -22,8 +22,10 @@ Available end game conditions are:
 - Stalemate
 - Player Resigns
 - Offer Draw
+- Draw by fifty-move rule (no pawn move or capture for fifty moves)
+- Draw by insufficient material
 
-Draw by insufficient material and draw by three-fold repetition are not implemented.
+Draw by three-fold repetition is not implemented.
 
 I have left my 'planning.txt' file in the repo which I used throughout the project to record my thinking about the various problems along the way and some pseudocode.
 

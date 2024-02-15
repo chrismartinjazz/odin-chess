@@ -13,7 +13,7 @@ class Chess
   attr_reader :move_list
 
   def initialize(position = nil, player1 = nil, player2 = nil)
-    @initial_position = position || %w[
+    initial_position = position || %w[
       rnbqkbnr
       pppppppp
       ........
@@ -25,7 +25,7 @@ class Chess
     ]
     @player1 = player1 || ask_player_type('White')
     @player2 = player2 || ask_player_type('Black')
-    @game_board = GameBoard.new(@initial_position)
+    @game_board = GameBoard.new(initial_position)
     @current_player = @player1
     @move_list = []
   end
@@ -49,13 +49,10 @@ class Chess
       new_save_load_exit(move) if %w[new save load exit].include?(move)
 
       if legal_moves_list.empty? || %w[draw resign].include?(move) || @game_board.fifty_move_counter >= 50
-        game_over('no legal moves') if legal_moves_list.empty?
-        game_over(move) if %w[draw resign].include?(move)
-        game_over('fifty move rule') if @game_board.fifty_move_counter >= 50
+        handle_game_over(move, legal_moves_list)
         next
       end
-      capture = make_move(move, legal_moves_list) unless %w[new save load].include?(move)
-      check_for_insufficient_material if capture
+      make_move(move, legal_moves_list) unless %w[new save load].include?(move)
     end
   end
 
@@ -71,13 +68,23 @@ class Chess
     accepted_move
   end
 
+  def handle_game_over(move, legal_moves_list)
+    game_over('no legal moves') if legal_moves_list.empty?
+    game_over(move) if %w[draw resign].include?(move)
+    game_over('fifty move rule') if @game_board.fifty_move_counter >= 50
+  end
+
   def make_move(move, legal_moves_list)
     promotion_piece = @current_player.ask_promotion_piece if pawn_promoting?(move)
     capture = @game_board.move_piece(move, promotion_piece)
+    check_for_insufficient_material if capture
     @move_list << Convert::ArrayToText.array_to_text(move, capture, legal_moves_list,
                                                      in_check: @game_board.in_check?(@current_player.color))
     next_player
-    capture
+  end
+
+  def pawn_promoting?(move)
+    move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
   end
 
   def check_for_insufficient_material
@@ -86,10 +93,6 @@ class Chess
     return unless %w[k kn bk knn].include?(@game_board.material['B'])
 
     game_over('insufficient material')
-  end
-
-  def pawn_promoting?(move)
-    move[0].upcase == 'P' && (move[2][0].zero? || move[2][0] == 7)
   end
 
   def next_player

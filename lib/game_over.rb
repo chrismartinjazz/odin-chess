@@ -80,7 +80,16 @@ module GameOver
 
   def new_game(game_data = { current_player_color: 'W',
                              move_list: [],
-                             position: @initial_position })
+                             position: %w[
+                               rnbqkbnr
+                               pppppppp
+                               ........
+                               ........
+                               ........
+                               ........
+                               PPPPPPPP
+                               RNBQKBNR
+                             ] })
     @current_player = game_data[:current_player_color] == 'W' ? @player1 : @player2
     @move_list = game_data[:move_list]
     @game_board = GameBoard.new(game_data[:position])
