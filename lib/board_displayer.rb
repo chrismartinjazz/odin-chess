@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'colorize'
-
 # Converts a board with piece objects into a colorized string with icons.
 module BoardDisplayer
   ICON_MAP = { 'K' => '♚ ', 'Q' => '♛ ', 'R' => '♜ ', 'B' => '♝ ', 'N' => '♞ ', 'P' => '♟︎ ',
                'k' => '♔ ', 'q' => '♕ ', 'r' => '♖ ', 'b' => '♗ ', 'n' => '♘ ', 'p' => '♙ ' }.freeze
+  LIGHT_SQUARE_COLOR_RGB = '188;63;188' # Magenta
+  DARK_SQUARE_COLOR_RGB = '102;102;102' # Light Grey
 
   extend self
 
@@ -43,10 +43,11 @@ module BoardDisplayer
   end
 
   def colorize_even_row_squares(board_icons, row_pair_i, col_i)
-    "#{board_icons[row_pair_i][col_i].on_grey}#{board_icons[row_pair_i][col_i + 1].on_magenta}"
+    "\e[48;2;#{DARK_SQUARE_COLOR_RGB}m#{board_icons[row_pair_i][col_i]}\e[0m\e[48;2;#{LIGHT_SQUARE_COLOR_RGB}m#{board_icons[row_pair_i][col_i + 1]}\e[0m"
   end
 
   def colorize_odd_row_squares(board_icons, row_pair_i, col_i)
-    "#{board_icons[row_pair_i + 1][col_i].on_magenta}#{board_icons[row_pair_i + 1][col_i + 1].on_grey}"
+    "\e[48;2;#{LIGHT_SQUARE_COLOR_RGB}m#{board_icons[row_pair_i + 1][col_i]}\e[0m\e[48;2;#{DARK_SQUARE_COLOR_RGB}m#{board_icons[row_pair_i + 1][col_i + 1]}\e[0m"
   end
+
 end
