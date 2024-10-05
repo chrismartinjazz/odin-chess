@@ -3,6 +3,7 @@
 Command line chess implemented as part of The Odin Project.
 
 # Summary
+
 This implementation of chess is for two players (human or computer) and is played in the terminal. The computer player simply chooses a random legal move in the position.
 
  Run `ruby lib/main.rb` from the root directory to play. After selecting human or computer players, the terminal is cleared and the game board displayed.
@@ -12,12 +13,14 @@ The key feature is a focus on algebraic notation. Moves are input using standard
 The game can also be saved and loaded using an in-game interface.
 
 Standard chess features implemented are:
+
 - Check
 - Castling (e.g. 0-0 or O-O for king-side, 0-0-0 or O-O-O for queen side)
 - Pawn promotion (e8)
 - En passant
 
 Available end game conditions are:
+
 - Checkmate
 - Stalemate
 - Player Resigns
@@ -30,20 +33,25 @@ Draw by three-fold repetition is not implemented.
 I have left my 'planning.txt' file in the repo which I used throughout the project to record my thinking about the various problems along the way and some pseudocode.
 
 # Code
+
 The board is a 2D array `[[rows][colums]]`. White is at the 'bottom' of the board on row index 7, and black is at the 'top' of the board on row index 0.
 
 Squares are represented as a row-column array pair. E.g. the square a8 is represented as [0, 0].
 
 Moves are represented by an array. The `piece` is a one-character string, where uppercase is white, lowercase is black. E.g. white queen is 'Q', black knight is 'n'. The 'squares' are row-column array pairs.
+
 ```rb
 [piece, [origin square], [destination square]]
 ```
+
 E.g. the move 'e4' by white is represented as:
+
 ```rb
 ['P', [6, 4], [4, 4]]
 ```
 
 The classes in use are:
+
 |Class|Purpose|
 |---|---|
 |Chess|Manage the game loop|
@@ -60,4 +68,5 @@ The 'FileManager' module is also largely independent of calling classes - it sav
 LegalMoves and its own module LegalCastlingMoves are very tightly coupled to the GameBoard class and are included as mixins.
 
 # Required gems
-'colorize'
+
+None.
